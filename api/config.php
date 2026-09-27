@@ -4,6 +4,6 @@ define('MP_ACCESS_TOKEN', 'APP_USR-5085854606401699-080915-1faa4cc31d1a96721a15e
 
 define('LOJA_NOME', 'Rosa Shop');
 
-define('SITE_URL', 'http://localhost/lojatiktokcheckout');
+define('SITE_URL', 'ps://rosashopstore.vercel.app/');');
 
 define('PIX_EXPIRATION_MINUTES', 30);

@@ -2356,57 +2356,27 @@ async function gerarPix() {
       });
 
 
-    const response =
-      await fetch(
-        "../api/criar_pix.php",
-        {
-
-          method: "POST",
-
-          headers: {
-
-            "Content-Type":
-              "application/json"
-
-          },
-
-          body: JSON.stringify({
-
-            name: nome,
-
-            email: email,
-
-            phone: telefone,
-
-            address: {
-
-              zip_code: cep,
-
-              street_name: rua,
-
-              street_number: numero,
-
-              complement:
-                complemento,
-
-              neighborhood:
-                bairro,
-
-              city:
-                cidade,
-
-              federal_unit:
-                estado
-
-            },
-
-            items:
-              items
-
-          })
-
-        }
-      );
+    const response = await fetch("/api/criar_pix.php", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    name: nome,
+    email: email,
+    phone: telefone,
+    address: {
+      zip_code: cep,
+      street_name: rua,
+      street_number: numero,
+      complement: complemento,
+      neighborhood: bairro,
+      city: cidade,
+      federal_unit: estado
+    },
+    items: items
+  })
+});
 
 
     const result =
