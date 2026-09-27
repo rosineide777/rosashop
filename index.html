@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sua Loja Responsiva</title>
+
+  <!-- =========================================================
+       CONFIGURAÇÃO DOS RASTREAMENTOS
+       ========================================================= -->
+
+  <script>
+    const TRACKING_CONFIG = {
+      /* Meta Ads */
+      META_PIXEL_ID: "COLOQUE_SEU_META_PIXEL_ID_AQUI",
+
+      /* Google Ads */
+      GOOGLE_ADS_ID: "COLOQUE_SEU_GOOGLE_ADS_ID_AQUI",
+      GOOGLE_ADS_PURCHASE_LABEL: "COLOQUE_SEU_LABEL_DE_PURCHASE_AQUI",
+
+      /* TikTok Ads */
+      TIKTOK_PIXEL_ID: "COLOQUE_SEU_TIKTOK_PIXEL_ID_AQUI"
+    };
+  </script>
+
+  <!-- META ADS / META PIXEL -->
+  <script>
+    (function () {
+      const pixelId = TRACKING_CONFIG.META_PIXEL_ID;
+      if (!pixelId || pixelId === "COLOQUE_SEU_META_PIXEL_ID_AQUI") return;
+
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+
+      fbq('init', pixelId);
+      fbq('track', 'PageView');
+    })();
+  </script>
+
+  <!-- GOOGLE ADS -->
+  <script>
+    (function () {
+      const googleAdsId = TRACKING_CONFIG.GOOGLE_ADS_ID;
+      if (!googleAdsId || googleAdsId === "COLOQUE_SEU_GOOGLE_ADS_ID_AQUI") return;
+
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(googleAdsId);
+      document.head.appendChild(script);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      window.gtag = gtag;
+
+      gtag('js', new Date());
+      gtag('config', googleAdsId);
+    })();
+  </script>
+
+  <!-- TIKTOK ADS / TIKTOK PIXEL -->
+  <script>
+    (function () {
+      const pixelId = TRACKING_CONFIG.TIKTOK_PIXEL_ID;
+      if (!pixelId || pixelId === "COLOQUE_SEU_TIKTOK_PIXEL_ID_AQUI") return;
+
+      !function (w,d,t) {
+        w.TiktokAnalyticsObject = t;
+        var ttq = w[t] = w[t] || [];
+        ttq.methods = ["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"];
+        ttq.setAndDefer = function (t,e) {
+          t[e] = function () {
+            t.push([e].concat(Array.prototype.slice.call(arguments,0)));
+          };
+        };
+        for (var i = 0; i < ttq.methods.length; i++) {
+          ttq.setAndDefer(ttq, ttq.methods[i]);
+        }
+        ttq.instance = function (t) {
+          for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) {
+            ttq.setAndDefer(e, ttq.methods[n]);
+          }
+          return e;
+        };
+        ttq.load = function (e,n) {
+          var r = "https://analytics.tiktok.com/i18n/pixel/events.js";
+          ttq._i = ttq._i || {};
+          ttq._i[e] = [];
+          ttq._i[e]._u = r;
+          ttq._t = ttq._t || {};
+          ttq._t[e] = +new Date();
+          ttq._o = ttq._o || {};
+          ttq._o[e] = n || {};
+          n = document.createElement("script");
+          n.type = "text/javascript";
+          n.async = true;
+          n.src = r + "?sdkid=" + e + "&lib=" + t;
+          e = document.getElementsByTagName("script")[0];
+          e.parentNode.insertBefore(n, e);
+        };
+        ttq.load(pixelId);
+        ttq.page();
+      }(window, document, 'ttq');
+    })();
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      padding-bottom: 80px;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: #f5f5f5;
+    }
+
+    /* CABEÇALHO */
+    .header {
+      background: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+    }
+
+    .store-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .store-details h1 {
+      font-size: clamp(14px, 2vw, 18px);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .verified {
+      color: #0095f6;
+      font-size: 14px;
+    }
+
+    .sales {
+      font-size: 12px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-follow {
+      background: #ff2d55;
+      color: #fff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-msg {
+      background: #fff;
+      border: 1px solid #ccc;
+      color: #333;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* ÍCONE DE CARRINHO NO TOP-HEADER */
+    .btn-cart-header {
+      position: relative;
+      background: #fff;
+      border: 1px solid #ccc;
+      color: #333;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ff2d55;
+      color: #fff;
+      font-size: 10px;
+      font-weight: bold;
+      height: 18px;
+      min-width: 18px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    /* BANNERS */
+    .banners {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #fff;
+    }
+
+    .coupon-card {
+      flex: 1 1 200px;
+      padding: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .coupon-left {
+      background: #e6f7f7;
+      border: 1px dashed #00b5b5;
+    }
+
+    .coupon-right {
+      background: #ffeef2;
+    }
+
+    .coupon-text p {
+      font-size: 12px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .coupon-text span {
+      font-size: 10px;
+      color: #666;
+    }
+
+    .btn-claim {
+      background: #00b5b5;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-claim.claimed {
+      background: #888;
+      cursor: default;
+    }
+
+    /* NAVEGAÇÃO */
+    .nav-tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      margin-top: 8px;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      color: #000;
+      font-weight: bold;
+      border-bottom: 2px solid #000;
+    }
+
+    /* SEÇÃO */
+    .section {
+      background: #fff;
+      padding: 16px;
+      margin-top: 8px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    /* GRID DOS PRODUTOS */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .product-card {
+      position: relative;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+      cursor: pointer;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .badge-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #ff6b00;
+      color: #fff;
+      font-size: 9px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-top-left-radius: 5px;
+      border-bottom-right-radius: 4px;
+      z-index: 1;
+    }
+
+    .product-img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #eee;
+      border-radius: 4px;
+      object-fit: cover;
+      display: block;
+    }
+
+.product-title {
+  font-size: 14px;
+  line-height: 1.3;
+  color: #333;
+  margin: 6px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2; /* Adicione esta linha */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+    .price-main {
+      color: #ff2d55;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .price-main span {
+      font-size: 11px;
+    }
+
+    .price-old {
+      font-size: 11px;
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .discount-tag {
+      font-size: 10px;
+      color: #ff2d55;
+      font-weight: bold;
+      background: #ffeef2;
+      display: inline-block;
+      padding: 1px 4px;
+      border-radius: 2px;
+      margin: 2px 0;
+    }
+
+    .shipping-tag {
+      font-size: 9px;
+      color: #00b5b5;
+      background: #e6f7f7;
+      display: inline-block;
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    .sold-count {
+      font-size: 10px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    /* BOTÃO ADICIONAR AO CARRINHO DO CARD */
+    .btn-add-cart {
+      width: 100%;
+      background: #ff2d55;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    .btn-add-cart:hover {
+      background: #e02447;
+    }
+
+    /* BARRA INFERIOR */
+    .bottom-bar-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #eee;
+      z-index: 1000;
+    }
+
+    .bottom-bar {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 10px 16px;
+    }
+
+    .bar-icon {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+    }
+
+    /* MODAL DO CARRINHO LATERAL */
+    .cart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: none;
+      justify-content: flex-end;
+    }
+
+    .cart-overlay.active {
+      display: flex;
+    }
+
+    .cart-drawer {
+      width: 100%;
+      max-width: 400px;
+      height: 100%;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+      animation: slideIn 0.25s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    .drawer-header {
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .drawer-header h2 {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .btn-close-drawer {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .drawer-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .drawer-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: center;
+    }
+
+    .drawer-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #f8f8f8;
+    }
+
+    .drawer-item-info {
+      flex: 1;
+    }
+
+    .drawer-item-title {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .drawer-item-price {
+      color: #ff2d55;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .drawer-item-qty {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .btn-remove-drawer {
+      background: transparent;
+      border: none;
+      color: #d00;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .btn-remove-drawer:hover {
+      color: #a00;
+    }
+
+    .drawer-footer {
+      padding: 16px;
+      border-top: 1px solid #eee;
+      background: #fafafa;
+    }
+
+    .drawer-total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .btn-go-cart {
+      width: 100%;
+      background: #ff2d55;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* MODAL DE CUPOM RESGATADO */
+    .coupon-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .coupon-modal-overlay.active {
+      display: flex;
+    }
+
+    .coupon-modal {
+      background: #fff;
+      width: 100%;
+      max-width: 360px;
+      border-radius: 12px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: popIn 0.3s ease-out;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .coupon-modal-icon {
+      width: 60px;
+      height: 60px;
+      background: #e6f7f7;
+      color: #00b5b5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin: 0 auto 16px auto;
+    }
+
+    .coupon-modal h3 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .coupon-modal p {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .coupon-benefits {
+      background: #f9f9f9;
+      border: 1px dashed #00b5b5;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .coupon-benefits-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #00b5b5;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .coupon-benefits ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .coupon-benefits li {
+      font-size: 12px;
+      color: #444;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-close-coupon-modal {
+      width: 100%;
+      background: #00b5b5;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* MODAL DE CHAT */
+    .chat-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 3000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .chat-modal-overlay.active {
+      display: flex;
+    }
+
+    .chat-container {
+      width: 100%;
+      max-width: 420px;
+      height: 80vh;
+      max-height: 550px;
+      background: #f5f5f5;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+      overflow: hidden;
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .chat-header {
+      background: #fff;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    .chat-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-avatar-img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .chat-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .chat-status {
+      font-size: 11px;
+      color: #27ae60;
+    }
+
+    .btn-close-chat {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #888;
+      cursor: pointer;
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-msg {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .chat-msg.bot {
+      background: #fff;
+      color: #333;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .chat-msg.user {
+      background: #ff2d55;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-typing {
+      font-size: 11px;
+      color: #888;
+      font-style: italic;
+      align-self: flex-start;
+    }
+
+    .chat-options {
+      padding: 12px 16px;
+      background: #fff;
+      border-top: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chat-btn-option {
+      background: #f0f2f5;
+      border: 1px solid #e4e6eb;
+      color: #333;
+      padding: 10px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .chat-btn-option:hover {
+      background: #e4e6eb;
+    }
+
+    /* MEDIA QUERIES */
+    @media (max-width: 800px) {
+      .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .product-title {
+        font-size: 13px;
+      }
+      .price-main {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 550px) {
+      .header { padding: 10px 12px; }
+      .avatar { width: 44px; height: 44px; font-size: 16px; }
+      .store-info { gap: 8px; }
+      .actions { gap: 4px; }
+      .btn-follow { padding: 6px 8px; font-size: 11px; }
+      .btn-msg { padding: 6px 8px; font-size: 11px; }
+      .btn-cart-header { padding: 6px 8px; font-size: 14px; }
+      .banners { padding: 10px 12px; }
+      .coupon-card { flex: 1 1 100%; }
+      .section { padding: 14px 12px; }
+      .product-grid { grid-template-columns: 1fr; gap: 20px; }
+      .product-card { width: 100%; }
+      .product-img { width: 100%; aspect-ratio: 1 / 1; }
+      .product-title { font-size: 14px; margin-top: 8px; }
+      .price-main { font-size: 18px; }
+      .price-old { font-size: 11px; }
+      .bottom-bar { padding: 8px 10px; }
+    }
+
+    @media (max-width: 380px) {
+      .header { padding: 8px; }
+      .store-details h1 { font-size: 13px; }
+      .sales { font-size: 10px; }
+      .btn-follow, .btn-msg, .btn-cart-header { font-size: 10px; padding: 5px 6px; }
+      .product-title { font-size: 13px; }
+      .price-main { font-size: 17px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- CABEÇALHO -->
+    <header class="header">
+      <div class="store-info">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk5VduTvozZDEXdm73KWCwnTJURNpvvsUUzBlK4lQH6A&s" alt="Rosa Shop Avatar" class="avatar">
+        <div class="store-details">
+          <h1>
+            Rosa Shop
+            <span class="verified">✓</span>
+          </h1>
+          <div class="sales">112.2K vendido(s)</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-follow">Seguir</button>
+        <button class="btn-msg" onclick="toggleChatModal()">Mensagem</button>
+        <button class="btn-cart-header" onclick="toggleCartDrawer()" title="Ver carrinho">
+          🛒
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CUPONS -->
+    <div class="banners">
+      <div class="coupon-card coupon-left">
+        <div class="coupon-text">
+          <p>Cupom de frete grátis</p>
+          <span>Sem gasto mínimo</span>
+        </div>
+        <button class="btn-claim" id="btnClaimCoupon" onclick="claimCoupon()">Resgatar</button>
+      </div>
+
+      <div class="coupon-card coupon-right">
+        <div class="coupon-text">
+          <p>Até 85% OFF</p>
+          <span>Em produtos selecionados</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVEGAÇÃO -->
+    <nav class="nav-tabs">
+      <div class="tab active">Página inicial</div>
+      <div class="tab">Produtos</div>
+      <div class="tab">Categorias</div>
+    </nav>
+
+    <!-- PRODUTOS -->
+    <section class="section">
+      <div class="section-title">Principais produtos</div>
+
+      <div class="product-grid">
+
+        <!-- PRODUTO 1 -->
+        <div class="product-card" onclick="trackProductClick({
+            id: 'produto1',
+            name: 'Patinete Elétrico Cross Pro 10 - Freio Hidraulico',
+            price: 89.90,
+            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVHQdv9_RldoAvgHfnVQl8FvAa7Yrs8IbUbM_ReyPWwheprKwMsml4exyq&s=10',
+            url: './pages/produto1.html'
+          })">
+          <span class="badge-top">TOP 1</span>
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVHQdv9_RldoAvgHfnVQl8FvAa7Yrs8IbUbM_ReyPWwheprKwMsml4exyq&s=10" class="product-img" alt="Patinete Elétrico Cross Pro 10">
+          
+          <div>
+            <div class="product-title">Patinete Elétrico Cross Pro 10" - Freio Hidraulico</div>
+            <div class="price-main"><span>R$ </span>89,90</div>
+            <div class="price-old">R$ 497,90</div>
+            <div class="discount-tag">86% OFF</div>
+            <br>
+            <div class="shipping-tag">Frete grátis</div>
+            <div class="sold-count">7643 vendido(s)</div>
+          </div>
+
+          <button class="btn-add-cart" onclick="addToCart(event, {
+            id: 'produto1',
+            name: 'Patinete Elétrico Cross Pro 10 - Freio Hidraulico',
+            price: 89.90,
+            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVHQdv9_RldoAvgHfnVQl8FvAa7Yrs8IbUbM_ReyPWwheprKwMsml4exyq&s=10'
+          })">Adicionar ao Carrinho</button>
+        </div>
+
+        <!-- PRODUTO 2 -->
+        <div class="product-card" onclick="trackProductClick({
+            id: 'produto2',
+            name: 'Scooter Elétrica TUI 1000w - 2 Lugares - Básico',
+            price: 199.90,
+            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZqlEH4bYfI7L9SRORF8fUgJCUo8LoXjK6lgeBzFLCAa-vWobcI1XN-cM&s=10',
+            url: './pages/produto2.html'
+          })">
+          <span class="badge-top">TOP 2</span>
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZqlEH4bYfI7L9SRORF8fUgJCUo8LoXjK6lgeBzFLCAa-vWobcI1XN-cM&s=10" class="product-img" alt="Scooter Elétrica TUI 1000W">
+          
+          <div>
+            <div class="product-title">Scooter Elétrica TUI 1000w | 2 Lugares | Básico | Sem CNH | Autonomia 60km</div>
+            <div class="price-main"><span>R$ </span>199,90</div>
+            <div class="price-old">R$ 1.659,90</div>
+            <div class="discount-tag">89% OFF</div>
+            <br>
+            <div class="shipping-tag">Frete grátis</div>
+            <div class="sold-count">5432 vendido(s)</div>
+          </div>
+
+          <button class="btn-add-cart" onclick="addToCart(event, {
+            id: 'produto2',
+            name: 'Scooter Elétrica TUI 1000w - 2 Lugares - Básico',
+            price: 199.90,
+            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZqlEH4bYfI7L9SRORF8fUgJCUo8LoXjK6lgeBzFLCAa-vWobcI1XN-cM&s=10'
+          })">Adicionar ao Carrinho</button>
+        </div>
+
+        <!-- PRODUTO 3 -->
+        <div class="product-card" onclick="trackProductClick({
+            id: 'produto3',
+            name: 'Apple iPhone 15, 15 Plus, 15 Pro e 15 Pro Max',
+            price: 599.90,
+            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSTWC50N5n6yvCzT07Y-h_08O7Iy5rnHlID4kT6PRwENW2xKWgpYxKWn0&s=10',
+            url: './pages/produto3.html'
+          })">
+          <span class="badge-top">TOP 3</span>
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSTWC50N5n6yvCzT07Y-h_08O7Iy5rnHlID4kT6PRwENW2xKWgpYxKWn0&s=10" class="product-img" alt="Apple iPhone 15">
+          
+          <div>
+            <div class="product-title">Apple iPhone 15, 15 Plus, 15 Pro e 15 Pro Max (Vitrine Premium)</div>
+            <div class="price-main"><span>R$ </span>599,90</div>
+            <div class="price-old">R$ 3596,90</div>
+            <div class="discount-tag">88% OFF</div>
+            <br>
+            <div class="shipping-tag">Frete grátis</div>
+            <div class="sold-count">877 vendido(s)</div>
+          </div>
+
+          <button class="btn-add-cart" onclick="addToCart(event, {
+            id: 'produto3',
+            name: 'Apple iPhone 15, 15 Plus, 15 Pro e 15 Pro Max',
+            price: 599.90,
+            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSTWC50N5n6yvCzT07Y-h_08O7Iy5rnHlID4kT6PRwENW2xKWgpYxKWn0&s=10'
+          })">Adicionar ao Carrinho</button>
+        </div>
+
+        <!-- PRODUTO 4 -->
+        <div class="product-card" onclick="trackProductClick({
+            id: 'produto4',
+            name: 'Jogo De Panelas Antiaderente',
+            price: 87.90,
+            image: 'https://http2.mlstatic.com/D_NQ_NP_2X_969228-MLA116374277020_092026-F.webp',
+            url: './pages/produto4.html'
+          })">
+          <span class="badge-top">TOP 4</span>
+          <img src="https://http2.mlstatic.com/D_NQ_NP_2X_969228-MLA116374277020_092026-F.webp" class="product-img" alt="Jogo De Panelas Antiaderente">
+          
+          <div>
+            <div class="product-title">Jogo de Panelas Antiaderente 10 Peças</div>
+            <div class="price-main"><span>R$ </span>87,90</div>
+            <div class="price-old">R$ 206,90</div>
+            <div class="discount-tag">95% OFF</div>
+            <br>
+            <div class="shipping-tag">Frete grátis</div>
+            <div class="sold-count">8.944 vendido(s)</div>
+          </div>
+
+          <button class="btn-add-cart" onclick="addToCart(event, {
+            id: 'produto4',
+            name: 'Jogo de Panelas Antiaderente 10 Peças',
+            price: 87.90,
+            image: 'https://http2.mlstatic.com/D_NQ_NP_2X_969228-MLA116374277020_092026-F.webp'
+          })">Adicionar ao Carrinho</button>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- BARRA INFERIOR -->
+  <div class="bottom-bar-wrapper">
+    <div class="bottom-bar">
+      <div class="bar-icon">
+        🛒
+        <span>Loja</span>
+      </div>
+
+      <div class="bar-icon" onclick="toggleCartDrawer()">
+        🛒
+        <span class="cart-badge" id="bottomCartBadge" style="top: -2px; right: 2px;">0</span>
+        <span>Carrinho</span>
+      </div>
+
+      <div class="bar-icon" onclick="toggleChatModal()">
+        💬
+        <span>Chat</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAWER / MODAL LATERAL DO CARRINHO -->
+  <div class="cart-overlay" id="cartOverlay" onclick="closeCartOverlay(event)">
+    <div class="cart-drawer">
+      <div class="drawer-header">
+        <h2>Seu Carrinho</h2>
+        <button class="btn-close-drawer" onclick="toggleCartDrawer()">✕</button>
+      </div>
+
+      <div class="drawer-content" id="drawerContent">
+        <!-- Conteúdo dinâmico via JS -->
+      </div>
+
+      <div class="drawer-footer" id="drawerFooter">
+        <div class="drawer-total">
+          <span>Total:</span>
+          <span id="drawerTotalValue">R$ 0,00</span>
+        </div>
+        <button class="btn-go-cart" onclick="window.location.href='pages/carrinho.html'">Ir para o Carrinho</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CUPOM RESGATADO -->
+  <div class="coupon-modal-overlay" id="couponModalOverlay">
+    <div class="coupon-modal">
+      <div class="coupon-modal-icon">🎉</div>
+      <h3>Cupom Resgatado!</h3>
+      <p>O cupom foi adicionado à sua conta com sucesso e será aplicado automaticamente no final do seu pedido.</p>
+
+      <div class="coupon-benefits">
+        <div class="coupon-benefits-title">Benefícios Ativados</div>
+        <ul>
+          <li>✓ <strong>Frete 100% Grátis</strong> para todo o Brasil</li>
+          <li>✓ <strong>Sem valor mínimo</strong> de compra exigido</li>
+          <li>✓ Válido para todos os produtos da loja</li>
+        </ul>
+      </div>
+
+      <button class="btn-close-coupon-modal" onclick="closeCouponModal()">Aproveitar Ofertas</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE CHAT INTERATIVO -->
+  <div class="chat-modal-overlay" id="chatModalOverlay" onclick="closeChatOverlay(event)">
+    <div class="chat-container">
+      
+      <!-- CABEÇALHO DO CHAT -->
+      <div class="chat-header">
+        <div class="chat-user">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk5VduTvozZDEXdm73KWCwnTJURNpvvsUUzBlK4lQH6A&s" alt="Rosa Shop" class="chat-avatar-img">
+          <div>
+            <div class="chat-name">Suporte Rosa Shop</div>
+            <div class="chat-status">● On-line agora</div>
+          </div>
+        </div>
+        <button class="btn-close-chat" onclick="toggleChatModal()">✕</button>
+      </div>
+
+      <!-- CORPO DAS MENSAGENS -->
+      <div class="chat-body" id="chatBody">
+        <div class="chat-msg bot">
+          Olá! 👋 Seja bem-vindo(a) ao suporte da <strong>Rosa Shop</strong>. Como podemos te ajudar hoje?
+        </div>
+      </div>
+
+      <!-- OPÇÕES PRÉ-DEFINIDAS -->
+      <div class="chat-options" id="chatOptions">
+        <button class="chat-btn-option" onclick="sendFaq(1)">🚚 Qual o prazo de entrega?</button>
+        <button class="chat-btn-option" onclick="sendFaq(2)">💳 Quais as formas de pagamento?</button>
+        <button class="chat-btn-option" onclick="sendFaq(3)">🔒 A compra é segura?</button>
+        <button class="chat-btn-option" onclick="sendFaq(4)">🏷️ Como uso meu cupom?</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SISTEMA DE RASTREAMENTO, CARRINHO, CUPOM E CHAT -->
+  <script>
+    function getStoredCart() {
+      return JSON.parse(localStorage.getItem('shopping_cart')) || JSON.parse(localStorage.getItem('cart')) || [];
+    }
+
+    function saveStoredCart(cart) {
+      localStorage.setItem('shopping_cart', JSON.stringify(cart));
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartBadges();
+    }
+
+    function updateCartBadges() {
+      const cart = getStoredCart();
+      const totalQty = cart.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+      
+      const headerBadge = document.getElementById('cartBadge');
+      const bottomBadge = document.getElementById('bottomCartBadge');
+
+      if (headerBadge) headerBadge.innerText = totalQty;
+      if (bottomBadge) bottomBadge.innerText = totalQty;
+    }
+
+    function toggleCartDrawer() {
+      const overlay = document.getElementById('cartOverlay');
+      overlay.classList.toggle('active');
+      if (overlay.classList.contains('active')) {
+        renderDrawerItems();
+      }
+    }
+
+    function closeCartOverlay(event) {
+      if (event.target.id === 'cartOverlay') {
+        toggleCartDrawer();
+      }
+    }
+
+    /* LÓGICA DO MODAL DE CUPOM */
+    function claimCoupon() {
+      const btn = document.getElementById('btnClaimCoupon');
+      btn.innerText = 'Resgatado';
+      btn.classList.add('claimed');
+      btn.disabled = true;
+
+      // Salva estado no localStorage
+      localStorage.setItem('coupon_claimed', 'true');
+
+      // Exibe modal
+      document.getElementById('couponModalOverlay').classList.add('active');
+    }
+
+    function closeCouponModal() {
+      document.getElementById('couponModalOverlay').classList.remove('active');
+    }
+
+    function checkCouponState() {
+      if (localStorage.getItem('coupon_claimed') === 'true') {
+        const btn = document.getElementById('btnClaimCoupon');
+        if (btn) {
+          btn.innerText = 'Resgatado';
+          btn.classList.add('claimed');
+          btn.disabled = true;
+        }
+      }
+    }
+
+    /* LÓGICA DO CHAT FALSO */
+    const faqs = {
+      1: {
+        question: "🚚 Qual o prazo de entrega?",
+        answer: "O prazo médio de entrega varia de 3 a 7 dias úteis para todo o Brasil com Frete Grátis!"
+      },
+      2: {
+        question: "💳 Quais as formas de pagamento?",
+        answer: "Aceitamos Cartão de Crédito em até 12x e Pix com aprovação imediata do seu pedido."
+      },
+      3: {
+        question: "🔒 A compra é segura?",
+        answer: "Sim! Utilizamos criptografia ponta a ponta e o processamento é 100% seguro com garantia de entrega."
+      },
+      4: {
+        question: "🏷️ Como uso meu cupom?",
+        answer: "Basta clicar em 'Resgatar' no topo da página! Seu desconto e frete grátis serão aplicados automaticamente."
+      }
+    };
+
+    function toggleChatModal() {
+      const overlay = document.getElementById('chatModalOverlay');
+      overlay.classList.toggle('active');
+    }
+
+    function closeChatOverlay(event) {
+      if (event.target.id === 'chatModalOverlay') {
+        toggleChatModal();
+      }
+    }
+
+    function sendFaq(id) {
+      const faq = faqs[id];
+      if (!faq) return;
+
+      const chatBody = document.getElementById('chatBody');
+
+      // Adiciona a pergunta do usuário
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg user';
+      userMsg.innerText = faq.question;
+      chatBody.appendChild(userMsg);
+
+      // Adiciona indicador de "digitando..."
+      const typing = document.createElement('div');
+      typing.className = 'chat-typing';
+      typing.innerText = 'Atendente digitando...';
+      chatBody.appendChild(typing);
+
+      // Rola o chat para o fim
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      // Simula o tempo de resposta do suporte (1 segundo)
+      setTimeout(() => {
+        typing.remove();
+
+        const botMsg = document.createElement('div');
+        botMsg.className = 'chat-msg bot';
+        botMsg.innerText = faq.answer;
+        chatBody.appendChild(botMsg);
+
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 1000);
+    }
+
+    /* REMOVER ITEM DO MODAL */
+    function removeFromDrawer(index) {
+      let cart = getStoredCart();
+      cart.splice(index, 1);
+      saveStoredCart(cart);
+      renderDrawerItems();
+    }
+
+    function renderDrawerItems() {
+      const cart = getStoredCart();
+      const container = document.getElementById('drawerContent');
+      const footer = document.getElementById('drawerFooter');
+      const totalElement = document.getElementById('drawerTotalValue');
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#888; margin-top:40px;">Seu carrinho está vazio.</p>';
+        footer.style.display = 'none';
+        return;
+      }
+
+      footer.style.display = 'block';
+      let html = '';
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const qty = Number(item.quantity) || 1;
+        const price = Number(item.price) || 0;
+        total += price * qty;
+
+        html += `
+          <div class="drawer-item">
+            <img src="${item.image || ''}" alt="${item.name}">
+            <div class="drawer-item-info">
+              <div class="drawer-item-title">${item.name}</div>
+              <div class="drawer-item-price">R$ ${price.toFixed(2).replace('.', ',')}</div>
+              <div class="drawer-item-qty">Qtd: ${qty}</div>
+            </div>
+            <button class="btn-remove-drawer" onclick="removeFromDrawer(${index})" title="Remover item">🗑️</button>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      totalElement.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    }
+
+    function trackViewContent() {
+      if (typeof window.fbq === 'function') {
+        fbq('track', 'ViewContent', {
+          content_type: 'product_group',
+          content_name: 'Patron Shop'
+        });
+      }
+
+      if (typeof window.ttq !== 'undefined' && typeof window.ttq.track === 'function') {
+        ttq.track('ViewContent', {
+          content_type: 'product_group',
+          content_name: 'Patron Shop'
+        });
+      }
+    }
+
+    function trackProductClick(product) {
+      try {
+        if (typeof window.fbq === 'function') {
+          fbq('track', 'ViewContent', {
+            content_ids: [product.id],
+            content_type: 'product',
+            content_name: product.name,
+            value: product.price,
+            currency: 'BRL'
+          });
+        }
+
+        if (typeof window.gtag === 'function') {
+          gtag('event', 'select_item', {
+            item_list_name: 'Principais produtos',
+            items: [{
+              item_id: product.id,
+              item_name: product.name,
+              price: product.price,
+              quantity: 1
+            }]
+          });
+        }
+
+        if (typeof window.ttq !== 'undefined' && typeof window.ttq.track === 'function') {
+          ttq.track('ViewContent', {
+            content_id: product.id,
+            content_type: 'product',
+            content_name: product.name,
+            value: product.price,
+            currency: 'BRL'
+          });
+        }
+      } catch (error) {
+        console.error('Erro no rastreamento do produto:', error);
+      }
+
+      window.location.href = product.url;
+    }
+
+    function addToCart(event, product) {
+      event.stopPropagation();
+
+      let cart = getStoredCart();
+      let existingItemIndex = cart.findIndex(item => item.id === product.id);
+
+      if (existingItemIndex > -1) {
+        cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity: 1
+        });
+      }
+
+      saveStoredCart(cart);
+
+      try {
+        if (typeof window.fbq === 'function') {
+          fbq('track', 'AddToCart', {
+            content_ids: [product.id],
+            content_type: 'product',
+            content_name: product.name,
+            value: product.price,
+            currency: 'BRL'
+          });
+        }
+
+        if (typeof window.gtag === 'function') {
+          gtag('event', 'add_to_cart', {
+            currency: 'BRL',
+            value: product.price,
+            items: [{
+              item_id: product.id,
+              item_name: product.name,
+              price: product.price,
+              quantity: 1
+            }]
+          });
+        }
+
+        if (typeof window.ttq !== 'undefined' && typeof window.ttq.track === 'function') {
+          ttq.track('AddToCart', {
+            content_id: product.id,
+            content_type: 'product',
+            content_name: product.name,
+            value: product.price,
+            currency: 'BRL'
+          });
+        }
+      } catch (error) {
+        console.error('Erro no rastreamento:', error);
+      }
+
+      toggleCartDrawer();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      trackViewContent();
+      updateCartBadges();
+      checkCouponState();
+    });
+  </script>
+
+  <!-- META PIXEL - NOSCRIPT -->
+  <noscript>
+    <img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=COLOQUE_SEU_META_PIXEL_ID_AQUI&ev=PageView&noscript=1">
+  </noscript>
+
+</body>
+</html>
