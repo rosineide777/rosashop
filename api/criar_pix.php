@@ -154,8 +154,8 @@ try {
             'price' => 89.90
         ],
         'produto2' => [
-            'name' => 'Scooter Elétrica TUI 1000w | 2 Lugares | Básico | Sem CNH | Autonomia 60km',
-            'price' => 199.90
+            'name' => 'Lava e Seca 11kg Hisense 11 Programas de Lavagem, Steam, Wi-fi Titanium',
+            'price' => 299.90
         ],
         'produto3' => [
             'name' => 'Apple iPhone 15 (Vitrine Premium)',
@@ -166,8 +166,8 @@ try {
             'price' => 87.90
         ],
         'produto5' => [
-            'name' => 'Lava e Seca 11kg Hisense 11 Programas de Lavagem, Steam, Wi-fi Titanium',
-            'price' => 299.90
+            'name' => 'Scooter Elétrica TUI 1000w | 2 Lugares | Básico | Sem CNH | Autonomia 60km',
+            'price' => 199.90
         ],
     ];
 
