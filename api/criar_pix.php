@@ -164,7 +164,11 @@ try {
         'produto4' => [
             'name' => 'Jogo de Panelas Antiaderente 10 Peças',
             'price' => 87.90
-        ]
+        ],
+        'produto5' => [
+            'name' => 'Lava e Seca 11kg Hisense 11 Programas de Lavagem, Steam, Wi-fi Titanium',
+            'price' => 299.90
+        ],
     ];
 
     $total = 0;

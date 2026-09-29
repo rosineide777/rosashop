@@ -1694,7 +1694,7 @@
             </div>
 
             <div class="info-sub">
-              Receba até 27 de set
+              Receba em até 7 dias
             </div>
 
           </div>
@@ -1708,49 +1708,89 @@
 
       <!-- CORES -->
 
-      <div class="info-item">
+<div class="info-item">
 
-        <div class="info-left">
+  <div class="info-left">
 
-          <span>🎨</span>
+    <span>🎨</span>
 
-          <div>
+    <div>
 
-            <div class="info-title">
-               opções disponíveis
-            </div>
+      <div class="info-title">
+        Escolha a cor
+      </div>
 
-            <div class="color-thumbnails">
+      <div class="color-thumbnails" style="gap: 8px;">
 
-              <div
-                class="color-thumb"
-                style="background:#000;"
-              ></div>
+        <button
+          type="button"
+          class="color-thumb color-option"
+          data-color="Preto"
+          onclick="selecionarCor('Preto', this)"
+          style="background:#000;"
+          aria-label="Preto"
+        ></button>
 
-              <div
-                class="color-thumb"
-                style="background:#007aff;"
-              ></div>
+        <button
+          type="button"
+          class="color-thumb color-option"
+          data-color="Azul"
+          onclick="selecionarCor('Azul', this)"
+          style="background:#007aff;"
+          aria-label="Azul"
+        ></button>
 
-              <div
-                class="color-thumb"
-                style="background:#eee;"
-              ></div>
+        <button
+          type="button"
+          class="color-thumb color-option"
+          data-color="Branco"
+          onclick="selecionarCor('Branco', this)"
+          style="background:#eee;"
+          aria-label="Branco"
+        ></button>
 
-              <div
-                class="color-thumb"
-                style="background:#ff9500;"
-              ></div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <span>›</span>
+        <button
+          type="button"
+          class="color-thumb color-option"
+          data-color="Laranja"
+          onclick="selecionarCor('Laranja', this)"
+          style="background:#ff9500;"
+          aria-label="Laranja"
+        ></button>
 
       </div>
+
+      <div
+        id="cor-selecionada"
+        style="margin-top: 6px; font-size: 12px; color: #666;"
+      >
+        Selecione uma cor
+      </div>
+
+    </div>
+
+  </div>
+
+  <span>›</span>
+
+</div>
+
+<script>
+function selecionarCor(cor, elemento) {
+  document.querySelectorAll('.color-option').forEach(botao => {
+    botao.style.outline = 'none';
+    botao.style.outlineOffset = '0';
+    botao.style.transform = 'scale(1)';
+  });
+
+  elemento.style.outline = '3px solid #e80070';
+  elemento.style.outlineOffset = '2px';
+  elemento.style.transform = 'scale(1.08)';
+
+  document.getElementById('cor-selecionada').textContent =
+    'Cor selecionada: ' + cor;
+}
+</script>
 
 
       <!-- CASHBACK -->
