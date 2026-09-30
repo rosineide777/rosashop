@@ -1035,6 +1035,55 @@
 
     <div class="info-list">
 
+<!-- IMPLEMENTAÇÃO: PESSOAS OLHANDO / ESTOQUE -->
+
+<div class="stock-alert">
+  <span class="stock-dot"></span>
+  <span><strong>71</strong> pessoas olhando | Restam <strong>43</strong> unidades</span>
+</div>
+
+<style>
+.stock-alert {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0;
+  font-size: 12px;
+  color: #555;
+}
+
+.stock-alert strong {
+  color: #e80070;
+  font-weight: 700;
+}
+
+.stock-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff3b30;
+  border-radius: 50%;
+  display: inline-block;
+  animation: stockPulse 1.2s infinite;
+}
+
+@keyframes stockPulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.35;
+    transform: scale(1.35);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+</style>
+
       <!-- FRETE -->
       <div class="info-item">
         <div class="info-left">

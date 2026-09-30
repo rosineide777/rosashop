@@ -177,6 +177,10 @@ try {
             'name' => 'Chuveiro Acqua Duo Lorenzetti',
             'price' => 69.90
         ],
+        'produto8' => [
+            'name' => 'Bicicleta Aro 29 GT Sprint MX7 24V index Freio Disco Alumínio Suspensão Aero MTB',
+            'price' => 399.90
+        ],
     ];
 
     $total = 0;
