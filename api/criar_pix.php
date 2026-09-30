@@ -163,11 +163,11 @@ try {
         ],
         'produto4' => [
             'name' => 'Patinete Elétrico Cross Pro 10 - Freio Hidraulico',
-            'price' => 89.90
+            'price' => 499.90
         ],
         'produto5' => [
             'name' => 'Scooter Elétrica TUI 1000w | 2 Lugares | Básico | Sem CNH | Autonomia 60km',
-            'price' => 199.90
+            'price' => 699.90
         ],
         'produto6' => [
             'name' => 'Kit completo de árvore de natal',
