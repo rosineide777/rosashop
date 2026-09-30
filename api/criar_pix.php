@@ -169,6 +169,10 @@ try {
             'name' => 'Scooter Elétrica TUI 1000w | 2 Lugares | Básico | Sem CNH | Autonomia 60km',
             'price' => 199.90
         ],
+        'produto6' => [
+            'name' => 'Kit completo de árvore de natal',
+            'price' => 59.90
+        ],
     ];
 
     $total = 0;
