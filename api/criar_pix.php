@@ -189,6 +189,10 @@ try {
             'name' => 'Cooktop Itatiaia Essencial 4 Bocas cor Preto',
             'price' => 99.90
         ],
+        'produto11' => [
+            'name' => 'Jogo de Panelas Cerâmica Kit 5 Peças Antiaderente Tampa Vidro',
+            'price' => 49.90
+        ],
     ];
 
     $total = 0;
