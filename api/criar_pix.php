@@ -150,8 +150,8 @@ try {
 
     $catalogo = [
         'produto1' => [
-            'name' => 'Patinete Elétrico Cross Pro 10 - Freio Hidraulico',
-            'price' => 89.90
+            'name' => 'Jogo de Panelas Antiaderente 10 Peças',
+            'price' => 87.90
         ],
         'produto2' => [
             'name' => 'Lava e Seca 11kg Hisense 11 Programas de Lavagem, Steam, Wi-fi Titanium',
@@ -162,8 +162,8 @@ try {
             'price' => 599.90
         ],
         'produto4' => [
-            'name' => 'Jogo de Panelas Antiaderente 10 Peças',
-            'price' => 87.90
+            'name' => 'Patinete Elétrico Cross Pro 10 - Freio Hidraulico',
+            'price' => 89.90
         ],
         'produto5' => [
             'name' => 'Scooter Elétrica TUI 1000w | 2 Lugares | Básico | Sem CNH | Autonomia 60km',
