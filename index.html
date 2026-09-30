@@ -900,6 +900,12 @@
       .product-title { font-size: 13px; }
       .price-main { font-size: 17px; }
     }
+
+.btn-follow.seguindo {
+  background: #ae2727;
+  color: #fff;
+}
+
   </style>
 </head>
 
@@ -921,7 +927,7 @@
       </div>
 
       <div class="actions">
-        <button class="btn-follow">Seguir</button>
+        <button class="btn-follow" onclick="seguirPagina(this)">Seguir</button>
         <button class="btn-msg" onclick="toggleChatModal()">Mensagem</button>
         <button class="btn-cart-header" onclick="toggleCartDrawer()" title="Ver carrinho">
           🛒
@@ -1507,6 +1513,12 @@
       updateCartBadges();
       checkCouponState();
     });
+
+function seguirPagina(botao) {
+  botao.textContent = "Seguindo ✓";
+  botao.classList.add("seguindo");
+}
+    
   </script>
 
   <!-- META PIXEL - NOSCRIPT -->

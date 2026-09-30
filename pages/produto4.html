@@ -1392,12 +1392,6 @@
 
     <div class="top-bar-right">
 
-      <button
-        class="top-bar-btn"
-        onclick="window.scrollTo({top:0,behavior:'smooth'})"
-      >
-        ⋮
-      </button>
 
 <a
   href="carrinho.html"
@@ -2721,18 +2715,16 @@ function selecionarCor(cor, elemento) {
     </div>
 
 
-    <div
-      class="icon-action"
-      onclick="trackChatClick()"
-    >
+    <div 
+  class="icon-action" 
+  onclick="compartilharProduto()"
+>
+  <span>📤</span>
 
-      <span>💬</span>
-
-      <span>
-        Chat
-      </span>
-
-    </div>
+  <span>
+    Compartilhar
+  </span>
+</div>
 
 
     <button
@@ -4378,6 +4370,29 @@ function selecionarCor(cor, elemento) {
     }
   );
 
+  function compartilharProduto() {
+
+  const url = window.location.href;
+
+  if (navigator.share) {
+
+    navigator.share({
+      title: document.title,
+      text: 'Confira este produto na Rosa Shop:',
+      url: url
+    });
+
+  } else {
+
+    navigator.clipboard.writeText(url).then(() => {
+
+      alert('Link do produto copiado!');
+
+    });
+
+  }
+
+}
 
 </script>
 
