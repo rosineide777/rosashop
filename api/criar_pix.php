@@ -181,6 +181,10 @@ try {
             'name' => 'Bicicleta Aro 29 GT Sprint MX7 24V index Freio Disco Alumínio Suspensão Aero MTB',
             'price' => 399.90
         ],
+        'produto9' => [
+            'name' => 'Sofá 3 Lugares Retrátil e Reclinável Cama inBox Senses 2,00m Velusoft Cinza',
+            'price' => 299.90
+        ],
     ];
 
     $total = 0;
