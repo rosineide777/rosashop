@@ -938,23 +938,202 @@
       </div>
     </header>
 
-    <!-- CUPONS -->
-    <div class="banners">
-      <div class="coupon-card coupon-left">
-        <div class="coupon-text">
-          <p>Cupom de frete grátis</p>
-          <span>Sem gasto mínimo</span>
-        </div>
-        <button class="btn-claim" id="btnClaimCoupon" onclick="claimCoupon()">Resgatar</button>
+<!-- =====================================================
+     CUPONS
+===================================================== -->
+
+<div class="banners">
+
+  <!-- CUPOM FRETE GRÁTIS -->
+  <div class="coupon-card coupon-left">
+
+    <div class="coupon-text">
+      <p>Cupom de frete grátis</p>
+      <span>Sem gasto mínimo</span>
+    </div>
+
+    <button
+      class="btn-claim"
+      id="btnClaimCoupon"
+      onclick="claimCoupon()"
+    >
+      Resgatar
+    </button>
+
+  </div>
+
+
+  <!-- CUPOM 95% OFF -->
+  <div class="coupon-card coupon-right">
+
+    <div class="coupon-text">
+      <p>Até 95% OFF</p>
+      <span>Em produtos selecionados</span>
+    </div>
+
+    <button
+      class="btn-claim"
+      id="btnClaimDiscount"
+      onclick="claimDiscountCoupon()"
+    >
+      Resgatar
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL DO CUPOM 95% OFF
+===================================================== -->
+
+<div
+  class="coupon-modal-overlay"
+  id="discountCouponModalOverlay"
+>
+
+  <div class="coupon-modal">
+
+    <div class="coupon-modal-icon">
+      🎉
+    </div>
+
+    <h3>
+      Desconto Resgatado!
+    </h3>
+
+    <p>
+      Seu cupom de desconto foi ativado com sucesso e será aplicado
+      automaticamente nos produtos participantes.
+    </p>
+
+    <div class="coupon-benefits">
+
+      <div class="coupon-benefits-title">
+        Benefícios Ativados
       </div>
 
-      <div class="coupon-card coupon-right">
-        <div class="coupon-text">
-          <p>Até 85% OFF</p>
-          <span>Em produtos selecionados</span>
-        </div>
-      </div>
+      <ul>
+        <li>
+          ✓ <strong>Até 95% OFF</strong> em produtos selecionados
+        </li>
+
+        <li>
+          ✓ Desconto aplicado automaticamente
+        </li>
+
+        <li>
+          ✓ Válido para produtos participantes da promoção
+        </li>
+      </ul>
+
     </div>
+
+    <button
+      type="button"
+      class="btn-claim"
+      onclick="closeDiscountCouponModal()"
+      style="margin-top:15px;"
+    >
+      Continuar comprando
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CSS DO NOVO CUPOM
+===================================================== -->
+
+<style>
+
+#btnClaimDiscount {
+  cursor: pointer;
+}
+
+#btnClaimDiscount.claimed {
+  background: #27ae60;
+  color: #fff;
+  border-color: #27ae60;
+}
+
+</style>
+
+
+<!-- =====================================================
+     SCRIPT DO CUPOM 95% OFF
+===================================================== -->
+
+<script>
+
+function claimDiscountCoupon() {
+
+  const btn = document.getElementById('btnClaimDiscount');
+
+  if (btn) {
+
+    btn.innerText = 'Resgatado';
+
+    btn.classList.add('claimed');
+
+    btn.disabled = true;
+
+  }
+
+  localStorage.setItem(
+    'discount_coupon_claimed',
+    'true'
+  );
+
+  document
+    .getElementById('discountCouponModalOverlay')
+    .classList.add('active');
+
+}
+
+
+function closeDiscountCouponModal() {
+
+  document
+    .getElementById('discountCouponModalOverlay')
+    .classList.remove('active');
+
+}
+
+
+function checkDiscountCouponState() {
+
+  const btn = document.getElementById('btnClaimDiscount');
+
+  if (
+    btn &&
+    localStorage.getItem('discount_coupon_claimed') === 'true'
+  ) {
+
+    btn.innerText = 'Resgatado';
+
+    btn.classList.add('claimed');
+
+    btn.disabled = true;
+
+  }
+
+}
+
+
+document.addEventListener(
+  'DOMContentLoaded',
+  function() {
+
+    checkDiscountCouponState();
+
+  }
+);
+
+</script>
 
     <!-- NAVEGAÇÃO -->
     <nav class="nav-tabs">
@@ -1286,6 +1465,35 @@
             name: 'Jogo De Panelas 5 Peças Antiaderente Cerâmica Tampa Vidro',
             price: 49.90,
             image: 'https://http2.mlstatic.com/D_Q_NP_661312-MLB116370815231_082026-F-jogo-de-panelas-5-pecas-antiaderente-ceramica-tampa-vidro.webp'
+          })">Adicionar ao Carrinho</button>
+        </div>
+
+        <!-- PRODUTO 11 -->
+        <div class="product-card" onclick="trackProductClick({
+            id: 'produto12',
+            name: 'Smart Tv Samsung 85 - 4k Crystal Ultra Hd Led Lh85befh',
+            price: 799.90,
+            image: 'https://http2.mlstatic.com/D_Q_NP_757691-MLA114066479268_072026-F.webp',
+            url: './pages/produto12.html'
+          })">
+          <span class="badge-top">TOP 11 - Queimão de Estoque</span>
+          <img src="https://http2.mlstatic.com/D_Q_NP_757691-MLA114066479268_072026-F.webp" class="product-img" alt="Lava e Seca 11kg Hisense 11 Programas de Lavagem, Steam, Wi-fi Titanium">
+          
+          <div>
+            <div class="product-title">Smart Tv Samsung 85'' 4k Crystal Ultra Hd Led Lh85befh</div>
+            <div class="price-main"><span>R$ </span>799,90 no pix</div>
+            <div class="price-old">R$ 2.199,90</div>
+            <div class="discount-tag">95% OFF</div>
+            <br>
+            <div class="shipping-tag">Frete grátis</div>
+            <div class="sold-count">777 vendido(s)</div>
+          </div>
+
+          <button class="btn-add-cart" onclick="addToCart(event, {
+            id: 'produto12',
+            name: 'Smart Tv Samsung 85 - 4k Crystal Ultra Hd Led Lh85befh',
+            price: 799.90,
+            image: 'https://http2.mlstatic.com/D_Q_NP_757691-MLA114066479268_072026-F.webp'
           })">Adicionar ao Carrinho</button>
         </div>
         

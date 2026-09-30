@@ -193,6 +193,10 @@ try {
             'name' => 'Jogo de Panelas Cerâmica Kit 5 Peças Antiaderente Tampa Vidro',
             'price' => 49.90
         ],
+        'produto12' => [
+            'name' => 'Smart Tv Samsung 85 - 4k Crystal Ultra Hd Led Lh85befhSmart Tv Samsung 85 - 4k Crystal Ultra Hd Led Lh85befh',
+            'price' => 799.90
+        ],
     ];
 
     $total = 0;
