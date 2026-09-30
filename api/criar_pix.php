@@ -182,7 +182,7 @@ try {
             'price' => 399.90
         ],
         'produto9' => [
-            'name' => 'Sofá 3 Lugares Retrátil e Reclinável Cama inBox Senses 2,00m Velusoft Cinza',
+            'name' => 'Sofá 3 Lugares Retrátil e Reclinável Cama inBox Senses 2,00m Velusoft Cinza ',
             'price' => 299.90
         ],
     ];
