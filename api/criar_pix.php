@@ -185,6 +185,10 @@ try {
             'name' => 'Sofá 3 Lugares Retrátil e Reclinável Cama inBox Senses 2,00m Velusoft Cinza ',
             'price' => 299.90
         ],
+        'produto10' => [
+            'name' => 'Cooktop Itatiaia Essencial 4 Bocas cor Preto',
+            'price' => 99.90
+        ],
     ];
 
     $total = 0;
