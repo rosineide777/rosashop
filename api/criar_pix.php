@@ -173,6 +173,10 @@ try {
             'name' => 'Kit completo de árvore de natal',
             'price' => 59.90
         ],
+        'produto7' => [
+            'name' => 'Chuveiro Acqua Duo Lorenzetti',
+            'price' => 69.90
+        ],
     ];
 
     $total = 0;
