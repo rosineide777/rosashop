@@ -1515,9 +1515,23 @@
     });
 
 function seguirPagina(botao) {
-  botao.textContent = "Seguindo ✓";
-  botao.classList.add("seguindo");
+  localStorage.setItem('pagina_seguindo', 'true');
+
+  botao.textContent = 'Seguindo ✓';
+  botao.classList.add('seguindo');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const botao = document.querySelector('.btn-follow');
+
+  if (
+    botao &&
+    localStorage.getItem('pagina_seguindo') === 'true'
+  ) {
+    botao.textContent = 'Seguindo ✓';
+    botao.classList.add('seguindo');
+  }
+});
     
   </script>
 
