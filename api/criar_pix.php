@@ -197,6 +197,10 @@ try {
             'name' => 'Smart Tv Samsung 85 - 4k Crystal Ultra Hd Led Lh85befhSmart Tv Samsung 85 - 4k Crystal Ultra Hd Led Lh85befh',
             'price' => 799.90
         ],
+        'produto13' => [
+            'name' => 'Terapia Ortopédica 4 em 1 para Joelho',
+            'price' => 99.90
+        ],
     ];
 
     $total = 0;
