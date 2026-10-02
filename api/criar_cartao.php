@@ -36,7 +36,7 @@ try {
     $token = trim((string)($input['token'] ?? ''));
     $paymentMethodId = trim((string)($input['payment_method_id'] ?? 'visa'));
     $installments = (int)($input['installments'] ?? 1);
-    $issuerId = $input['issuer_id'] ?? null;
+    $issuerId = isset($input['issuer_id']) && !empty($input['issuer_id']) ? (string)$input['issuer_id'] : null;
 
     if (empty($token)) {
         http_response_code(400);
@@ -49,7 +49,6 @@ try {
     $email = trim((string)($input['email'] ?? ''));
     $phone = trim((string)($input['phone'] ?? ''));
     $cpf = preg_replace('/\D+/', '', (string)($input['cpf'] ?? ''));
-    $address = $input['address'] ?? [];
     $items = $input['items'] ?? [];
 
     if ($name === '') {
@@ -96,6 +95,7 @@ try {
 
     $total = 0;
     $produtosValidados = [];
+    $mpItems = [];
 
     foreach ($items as $item) {
         if (!is_array($item)) continue;
@@ -122,6 +122,14 @@ try {
             'price' => $unitPrice,
             'quantity' => $quantity,
             'subtotal' => round($subtotal, 2)
+        ];
+
+        // Itens formatados para o antifraude do Mercado Pago
+        $mpItems[] = [
+            'id' => $id,
+            'title' => $produto['name'],
+            'quantity' => $quantity,
+            'unit_price' => $unitPrice
         ];
     }
 
@@ -162,10 +170,13 @@ try {
                 'type' => 'CPF',
                 'number' => $cpf
             ]
+        ],
+        'additional_info' => [
+            'items' => $mpItems
         ]
     ];
 
-    if ($issuerId) {
+    if ($issuerId !== null) {
         $paymentData['issuer_id'] = $issuerId;
     }
 
