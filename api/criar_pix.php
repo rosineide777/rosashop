@@ -201,6 +201,10 @@ try {
             'name' => 'Terapia Ortopédica 4 em 1 para Joelho',
             'price' => 99.90
         ],
+        'produto14' => [
+            'name' => 'iPhone 17 Pro Max 256GB',
+            'price' => 999.90
+        ],
     ];
 
     $total = 0;
