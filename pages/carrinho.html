@@ -1265,7 +1265,7 @@
 
         <div class="success-text">
           Recebemos seu pagamento com sucesso.<br>
-          Seu pedido foi confirmed.
+          Seu pedido foi confirmado.
         </div>
 
         <a
@@ -1300,10 +1300,9 @@ let mp = null;
 let detectedPaymentMethodId = 'visa';
 let detectedIssuerId = null;
 
-/* Inicializar Mercado Pago JS SDK se chave disponível */
+/* Inicializar Mercado Pago JS SDK com a Public Key atualizada */
 try {
-  // Inicialize o Mercado Pago SDK com a sua Public Key
-  mp = new MercadoPago('APP_USR-da2c1ef4-61aa-46d5-8fbe-6cb14fb2e20b');
+  mp = new MercadoPago('APP_USR-774d0122-1798-4a2b-9198-a3d186d3a3bc');
 } catch (e) {
   console.log("Mercado Pago SDK carregando...");
 }
