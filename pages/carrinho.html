@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rosa Shop - Meu Carrinho</title>
   <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk5VduTvozZDEXdm73KWCwnTJURNpvvsUUzBlK4lQH6A&s">
-
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -142,18 +142,17 @@
       min-width: 0;
     }
 
-.product-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2; /* Adicione esta linha para tirar o aviso em amarelo */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+    .product-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
     .product-price {
       color: #ff2d55;
@@ -399,6 +398,32 @@
       color: #ff2d55;
     }
 
+    /* SELEÇÃO DE MÉTODO DE PAGAMENTO */
+    .payment-options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .payment-tab {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fafafa;
+      cursor: pointer;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .payment-tab.active {
+      border-color: #ff2d55;
+      background: #fff0f3;
+      color: #ff2d55;
+    }
+
     .pix-method {
       border: 1px solid #00b5b5;
       background: #f1ffff;
@@ -437,10 +462,15 @@
       margin-top: 2px;
     }
 
-    /* =========================================================
-       MODAL PIX
-    ========================================================= */
+    .card-method-box {
+      border: 1px solid #ddd;
+      background: #fafafa;
+      border-radius: 6px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
 
+    /* MODAL PIX */
     .pix-area {
       display: none;
       position: fixed;
@@ -983,43 +1013,116 @@
               Forma de pagamento
             </div>
 
-
-            <div class="pix-method">
-
-              <div class="pix-icon">
-                PIX
+            <!-- OPÇÕES DE PAGAMENTO -->
+            <div class="payment-options">
+              <div
+                class="payment-tab active"
+                id="tabPix"
+                onclick="selecionarMetodo('pix')"
+              >
+                ❖ Pix
               </div>
-
-              <div>
-
-                <strong>
-                  Pagamento via Pix
-                </strong>
-
-                <span>
-                  Pagamento rápido e seguro
-                </span>
-
+              <div
+                class="payment-tab"
+                id="tabCard"
+                onclick="selecionarMetodo('card')"
+              >
+                💳 Cartão de Crédito
               </div>
-
             </div>
 
 
-            <button
-              type="button"
-              class="checkout-button"
-              id="generatePixButton"
-              onclick="gerarPix()"
-            >
-              Gerar Pix
-            </button>
+            <!-- CONTAINER PIX -->
+            <div id="pixContainer">
+              <div class="pix-method">
+
+                <div class="pix-icon">
+                  PIX
+                </div>
+
+                <div>
+
+                  <strong>
+                    Pagamento via Pix
+                  </strong>
+
+                  <span>
+                    Pagamento rápido e seguro
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="checkout-button"
+                id="generatePixButton"
+                onclick="gerarPix()"
+              >
+                Gerar Pix
+              </button>
+            </div>
+
+
+            <!-- CONTAINER CARTÃO DE CRÉDITO -->
+            <div id="cardContainer" style="display: none;">
+              <div class="card-method-box">
+                <div class="form-group">
+                  <label class="form-label">Número do Cartão <span class="required">*</span></label>
+                  <input type="text" id="cardNumber" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19" oninput="consultarParcelas()">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Nome impresso no Cartão <span class="required">*</span></label>
+                  <input type="text" id="cardholderName" class="form-input" placeholder="Como está no cartão">
+                </div>
+
+                <div class="form-row-three">
+                  <div class="form-group">
+                    <label class="form-label">Mês <span class="required">*</span></label>
+                    <input type="text" id="expirationMonth" class="form-input" placeholder="MM" maxlength="2">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ano <span class="required">*</span></label>
+                    <input type="text" id="expirationYear" class="form-input" placeholder="AA ou AAAA" maxlength="4">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CVV <span class="required">*</span></label>
+                    <input type="text" id="securityCode" class="form-input" placeholder="123" maxlength="4">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">CPF do Titular <span class="required">*</span></label>
+                  <input type="text" id="cardholderCpf" class="form-input" placeholder="000.000.000-00" maxlength="14">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Opções de Parcelamento <span class="required">*</span></label>
+                  <select id="installments" class="form-input">
+                    <option value="1">1x à vista</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="checkout-button"
+                id="payCardButton"
+                onclick="pagarComCartao()"
+              >
+                Pagar com Cartão
+              </button>
+            </div>
 
 
             <div
               class="loading"
               id="loadingMessage"
             >
-              Gerando seu pagamento Pix...
+              Processando seu pagamento...
             </div>
 
           </div>
@@ -1172,6 +1275,212 @@ const FALLBACK_KEY = "cart";
 let currentPaymentId = null;
 let paymentPolling = null;
 let paymentApproved = false;
+let mp = null;
+let detectedPaymentMethodId = 'visa';
+let detectedIssuerId = null;
+
+/* Inicializar Mercado Pago JS SDK se chave disponível */
+try {
+  // Inicialize o Mercado Pago SDK com a sua Public Key
+  mp = new MercadoPago('PUBLIC_KEY_MERCADO_PAGO');
+} catch (e) {
+  console.log("Mercado Pago SDK carregando...");
+}
+
+
+/* SELEÇÃO DE MÉTODO DE PAGAMENTO */
+function selecionarMetodo(metodo) {
+  const tabPix = document.getElementById("tabPix");
+  const tabCard = document.getElementById("tabCard");
+  const pixContainer = document.getElementById("pixContainer");
+  const cardContainer = document.getElementById("cardContainer");
+
+  if (metodo === 'pix') {
+    tabPix.classList.add("active");
+    tabCard.classList.remove("active");
+    pixContainer.style.display = "block";
+    cardContainer.style.display = "none";
+  } else {
+    tabCard.classList.add("active");
+    tabPix.classList.remove("active");
+    cardContainer.style.display = "block";
+    pixContainer.style.display = "none";
+  }
+}
+
+
+/* CONSULTAR PARCELAS VIA SDK DO MERCADO PAGO */
+async function consultarParcelas() {
+  const cardNumberInput = document.getElementById('cardNumber');
+  if (!cardNumberInput) return;
+
+  const rawNumber = cardNumberInput.value.replace(/\D/g, '');
+  if (rawNumber.length >= 6 && mp) {
+    const bin = rawNumber.substring(0, 6);
+    try {
+      const totalAmount = getCartTotal().toFixed(2);
+      const installmentsData = await mp.getInstallments({
+        amount: totalAmount,
+        bin: bin
+      });
+
+      if (installmentsData && installmentsData.length > 0) {
+        detectedPaymentMethodId = installmentsData[0].payment_method_id || 'visa';
+        detectedIssuerId = installmentsData[0].issuer?.id || null;
+        
+        const payerCosts = installmentsData[0].payer_costs || [];
+        const selectInstallments = document.getElementById('installments');
+        selectInstallments.innerHTML = '';
+
+        payerCosts.forEach(cost => {
+          const opt = document.createElement('option');
+          opt.value = cost.installments;
+          opt.textContent = `${cost.installments}x de R$ ${Number(cost.installment_amount).toFixed(2)} (${cost.recommended_message || 'Total: R$ ' + Number(cost.total_amount).toFixed(2)})`;
+          selectInstallments.appendChild(opt);
+        });
+      }
+    } catch (err) {
+      console.log('Erro ao buscar parcelas:', err);
+    }
+  }
+}
+
+
+/* PAGAR COM CARTÃO DE CRÉDITO */
+async function pagarComCartao() {
+  if (paymentApproved) return;
+
+  const cart = getCart();
+  if (cart.length === 0) {
+    alert("Seu carrinho está vazio.");
+    return;
+  }
+
+  const nome = document.getElementById("customerName")?.value.trim() || "";
+  const email = document.getElementById("customerEmail")?.value.trim() || "";
+  const telefone = document.getElementById("customerPhone")?.value.trim() || "";
+  const cep = document.getElementById("addressZip")?.value.trim() || "";
+  const rua = document.getElementById("addressStreet")?.value.trim() || "";
+  const numero = document.getElementById("addressNumber")?.value.trim() || "";
+  const complemento = document.getElementById("addressComplement")?.value.trim() || "";
+  const bairro = document.getElementById("addressNeighborhood")?.value.trim() || "";
+  const cidade = document.getElementById("addressCity")?.value.trim() || "";
+  const estado = document.getElementById("addressState")?.value.trim() || "";
+
+  const cardNumber = document.getElementById("cardNumber")?.value.replace(/\D/g, '') || "";
+  const cardholderName = document.getElementById("cardholderName")?.value.trim() || "";
+  const expirationMonth = document.getElementById("expirationMonth")?.value.trim() || "";
+  const expirationYear = document.getElementById("expirationYear")?.value.trim() || "";
+  const securityCode = document.getElementById("securityCode")?.value.trim() || "";
+  const cpf = document.getElementById("cardholderCpf")?.value.replace(/\D/g, '') || "";
+  const installments = parseInt(document.getElementById("installments")?.value || '1');
+
+  if (!nome || !email || !telefone || !cep || !rua || !numero || !bairro || !cidade || !estado) {
+    alert("Preencha todos os dados de entrega.");
+    return;
+  }
+
+  if (!cardNumber || !cardholderName || !expirationMonth || !expirationYear || !securityCode || !cpf) {
+    alert("Preencha todos os campos do cartão de crédito.");
+    return;
+  }
+
+  const payBtn = document.getElementById("payCardButton");
+  const loading = document.getElementById("loadingMessage");
+
+  if (payBtn) {
+    payBtn.disabled = true;
+    payBtn.textContent = "Processando Cartão...";
+  }
+  if (loading) loading.classList.add("active");
+
+  try {
+    if (!mp) {
+      throw new Error("SDK do Mercado Pago não foi inicializado.");
+    }
+
+    // 1. Gera o token seguro do cartão no Mercado Pago
+    const cardToken = await mp.createCardToken({
+      cardNumber: cardNumber,
+      cardholderName: cardholderName,
+      expirationMonth: expirationMonth,
+      expirationYear: expirationYear.length === 2 ? '20' + expirationYear : expirationYear,
+      securityCode: securityCode,
+      identificationType: 'CPF',
+      identificationNumber: cpf
+    });
+
+    if (!cardToken || !cardToken.id) {
+      throw new Error("Não foi possível validar os dados do cartão.");
+    }
+
+    const items = cart.map(item => ({
+      id: getProductId(item),
+      quantity: getItemQuantity(item)
+    }));
+
+    // 2. Envia para o backend PHP
+    const response = await fetch("/api/criar_cartao.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: cardToken.id,
+        payment_method_id: detectedPaymentMethodId,
+        installments: installments,
+        issuer_id: detectedIssuerId,
+        name: nome,
+        email: email,
+        phone: telefone,
+        cpf: cpf,
+        address: {
+          zip_code: cep,
+          street_name: rua,
+          street_number: numero,
+          complement: complemento,
+          neighborhood: bairro,
+          city: cidade,
+          federal_unit: estado
+        },
+        items: items
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || result.error_detail || "Pagamento por cartão recusado.");
+    }
+
+    currentPaymentId = result.payment_id || result.id;
+    
+    if (result.status === 'approved') {
+      paymentApproved = true;
+      registerPurchase(result);
+      clearCart();
+      
+      const checkoutContent = document.getElementById("checkoutContent");
+      if (checkoutContent) checkoutContent.style.display = "none";
+
+      const successBox = document.getElementById("successBox");
+      if (successBox) successBox.classList.add("active");
+
+      const paymentIdText = document.getElementById("paymentIdText");
+      if (paymentIdText) paymentIdText.textContent = "Pagamento: " + currentPaymentId;
+    } else {
+      alert(`Status do Cartão: ${result.status} (${result.status_detail || 'Pendente de aprovação'})`);
+    }
+
+  } catch (error) {
+    console.error("Erro ao pagar com cartão:", error);
+    alert(error.message || "Erro ao processar pagamento por cartão.");
+  } finally {
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.textContent = "Pagar com Cartão";
+    }
+    if (loading) loading.classList.remove("active");
+  }
+}
 
 
 /* =========================================================
@@ -1203,11 +1512,6 @@ function getCart() {
     if (!Array.isArray(cart)) {
       return [];
     }
-
-    /*
-      NÃO existe lista fixa de produtos aqui.
-      Qualquer produto com ID válido pode permanecer no carrinho.
-    */
 
     return cart.filter(item => {
 
@@ -1814,7 +2118,6 @@ function removeItem(index) {
 
 /* =========================================================
    RESUMO DO CHECKOUT
-   AGORA COM FOTO DO PRODUTO
 ========================================================= */
 
 function renderCheckoutSummary() {
@@ -2369,11 +2672,6 @@ async function gerarPix() {
 
   try {
 
-    /*
-      Envia TODOS os produtos
-      existentes no carrinho.
-    */
-
     const items =
       cart.map(item => {
 
@@ -2394,26 +2692,26 @@ async function gerarPix() {
 
 
     const response = await fetch("/api/criar_pix.php", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    name: nome,
-    email: email,
-    phone: telefone,
-    address: {
-      zip_code: cep,
-      street_name: rua,
-      street_number: numero,
-      complement: complemento,
-      neighborhood: bairro,
-      city: cidade,
-      federal_unit: estado
-    },
-    items: items
-  })
-});
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: nome,
+        email: email,
+        phone: telefone,
+        address: {
+          zip_code: cep,
+          street_name: rua,
+          street_number: numero,
+          complement: complemento,
+          neighborhood: bairro,
+          city: cidade,
+          federal_unit: estado
+        },
+        items: items
+      })
+    });
 
 
     const result =
@@ -2508,15 +2806,8 @@ async function gerarPix() {
     }
 
 
-    /*
-      ABRE O MODAL SOMENTE
-      DEPOIS DO PIX SER GERADO
-    */
-
     abrirPixModal();
 
-
-    /* INICIA CONSULTA */
 
     startPaymentPolling();
 
@@ -2792,35 +3083,16 @@ async function checkPaymentStatus() {
     }
 
 
-    /*
-      Purchase SOMENTE depois
-      do pagamento aprovado.
-    */
-
     registerPurchase(
       result
     );
 
 
-    /*
-      Limpa o carrinho somente
-      após aprovação.
-    */
-
     clearCart();
 
 
-    /*
-      Fecha o modal Pix
-      automaticamente.
-    */
-
     fecharPixModal();
 
-
-    /*
-      Mostra confirmação.
-    */
 
     const successBox =
       document.getElementById(
@@ -2836,10 +3108,6 @@ async function checkPaymentStatus() {
 
     }
 
-
-    /*
-      Mostra ID do pagamento.
-    */
 
     const paymentIdText =
       document.getElementById(
@@ -2946,10 +3214,6 @@ function registerPurchase(
   }
 
 
-  /*
-    Impede Purchase duplicado.
-  */
-
   const storageKey =
     "purchase_registered_" +
     paymentId;
@@ -2976,10 +3240,7 @@ function registerPurchase(
     "BRL";
 
 
-  /* =====================================================
-     META PIXEL
-  ===================================================== */
-
+  /* META PIXEL */
   if (
     typeof window.fbq ===
     "function"
@@ -3002,10 +3263,7 @@ function registerPurchase(
   }
 
 
-  /* =====================================================
-     GOOGLE
-  ===================================================== */
-
+  /* GOOGLE */
   if (
     typeof window.gtag ===
     "function"
@@ -3031,10 +3289,7 @@ function registerPurchase(
   }
 
 
-  /* =====================================================
-     TIKTOK
-  ===================================================== */
-
+  /* TIKTOK */
   if (
     window.ttq &&
     typeof window.ttq.track ===
