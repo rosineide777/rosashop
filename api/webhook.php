@@ -1,5 +1,9 @@
 <?php
 
+// Desativa a exibição de erros/avisos HTML para não sujar a resposta JSON
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/config.php';
@@ -152,7 +156,7 @@ if (
 |--------------------------------------------------------------------------
 */
 
-$url = 'https://api.mercadopago.com/v1/payments/' . urlencode($paymentId);
+$url = 'https://mercadopago.com' . urlencode($paymentId);
 
 $ch = curl_init($url);
 
@@ -261,39 +265,34 @@ $externalReference = $payment['external_reference'] ?? null;
 |--------------------------------------------------------------------------
 | PAGAMENTO APROVADO
 |--------------------------------------------------------------------------
-|
-| Aqui é onde sabemos que o Mercado Pago realmente aprovou
-| o pagamento.
-|
-| IMPORTANTE:
-|
-| Não coloque Purchase simplesmente porque o webhook foi recebido.
-|
-| O Purchase deve ocorrer quando:
-|
-| $status === 'approved'
-|
-| O seu carrinho.html já faz esse controle através do
-| consultar_pix.php.
-|
-|--------------------------------------------------------------------------
 */
 
 if ($status === 'approved') {
 
-    /*
-     * Aqui futuramente podemos:
-     *
-     * - registrar o pedido
-     * - salvar em arquivo
-     * - enviar e-mail
-     * - atualizar estoque
-     * - liberar produto
-     * - registrar conversão
-     *
-     * Como estamos trabalhando sem banco de dados,
-     * não vamos criar nenhuma dessas operações agora.
-     */
+    // --- INTEGRALIZAÇÃO ATIVA BEMOB POSTBACK ---
+    if (!empty($externalReference) && strpos($externalReference, '___') !== false) {
+        
+        // Separa o clickId do BeMob que guardamos antes do '___'
+        $partes = explode('___', $externalReference);
+        $clickId = trim($partes[0]);
+        
+        if (!empty($clickId)) {
+            // Monte a URL do seu Postback obtida no painel do BeMob
+            // Substituímos REPLACE pelo clickId extraído e o payout pelo valor real
+            $bemobPostbackUrl = "https://bemobtrcks.com" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount);
+            
+            // Dispara a chamada silenciosa S2S para o servidor do BeMob
+            $chBemob = curl_init($bemobPostbackUrl);
+            curl_setopt_array($chBemob, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 15,
+                CURLOPT_CONNECTTIMEOUT => 5
+            ]);
+            curl_exec($chBemob);
+            curl_close($chBemob);
+        }
+    }
+    // -------------------------------------------
 }
 
 

@@ -9,18 +9,7 @@
   <link rel="icon" type="image/png" href="https://static.clube.netshoes.com.br/produtos/bicicleta-29-gt-sprint-mx7-24v-index-freio-disco-aluminio-mtb/02/QNQ-0038-002/QNQ-0038-002_zoom1.jpg?ts=1771455274&ims=1088x">
 
 
-  <!-- UnicoTracker -->
-<script>
-(function(l,d,t,r,c,k){
-if(!l.lh){l.lh=l.lh||{_c:[]};
-c=d.getElementsByTagName('head')[0];
-k=d.createElement('script');k.async=1;
-k.src=t;c.appendChild(k);}
-l.lht = l.lht || function(k,v){l.lh._c.push([k,v])};
-lht('up', 'Fs')
-})(window,document,'//tag.lhtrack.com.br/2570.js?v=1');
-</script>
-<!-- End UnicoTracker -->
+
 
 
   <!-- =========================================================
@@ -2315,6 +2304,21 @@ Marca: GT Sprint<br><br>
 
 }
 
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Lê os parâmetros que estão na URL da barra de endereço
+    const urlParams = new URLSearchParams(window.location.search);
+    const subid_da_url = urlParams.get('subid');
+
+    // 2. Se encontrou o subid na URL, salva ele no navegador do cliente
+    if (subid_da_url) {
+        localStorage.setItem('bemob_subid', subid_da_url);
+        console.log('Subid do BeMob capturado e guardado:', subid_da_url);
+    }
+});
 </script>
 
 </body>

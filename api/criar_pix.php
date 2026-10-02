@@ -280,13 +280,24 @@ try {
         $streetNumberClean = '0';
     }
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | REFERÊNCIAS
     |--------------------------------------------------------------------------
     */
+    // --- ATUALIZAÇÃO BEMOB: CAPTURA O SUBID ENVIADO PELO JAVASCRIPT ---
+    $subid = isset($input['subid']) ? trim((string)$input['subid']) : '';
+
     $randomReference = strtoupper(bin2hex(random_bytes(4)));
-    $externalReference = 'ROSA-' . date('YmdHis') . '-' . $randomReference;
+    
+    // Concatenamos o subid na referência se ele existir
+    if (!empty($subid)) {
+        $externalReference = $subid . '___ROSA-' . date('YmdHis') . '-' . $randomReference;
+    } else {
+        $externalReference = 'ROSA-' . date('YmdHis') . '-' . $randomReference;
+    }
+    // -----------------------------------------------------------------
+    
     $idempotencyKey = bin2hex(random_bytes(16));
 
     /*
@@ -298,7 +309,7 @@ try {
         'transaction_amount' => $total,
         'description' => LOJA_NOME . ' - Pedido ' . $externalReference,
         'payment_method_id' => 'pix',
-        'external_reference' => $externalReference,
+        'external_reference' => $externalReference, // Envia a referência atualizada com o subid acoplado
         'payer' => [
             'email' => $email,
             'first_name' => $firstName,

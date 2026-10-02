@@ -166,7 +166,7 @@ try {
         exit;
     }
 
-    // Tratamento de Nome e Telefone
+        // Tratamento de Nome e Telefone
     $nameParts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY);
     $firstName = $nameParts[0] ?? $name;
     $lastName = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : 'Cliente';
@@ -175,8 +175,19 @@ try {
     $areaCode = strlen($phoneNumbers) >= 10 ? substr($phoneNumbers, 0, 2) : '';
     $phoneNumber = strlen($phoneNumbers) >= 10 ? substr($phoneNumbers, 2) : $phoneNumbers;
 
+    // --- ATUALIZAÇÃO BEMOB: CAPTURA O SUBID ENVIADO PELO JAVASCRIPT ---
+    $subid = isset($input['subid']) ? trim((string)$input['subid']) : '';
+
     $randomReference = strtoupper(bin2hex(random_bytes(4)));
-    $externalReference = 'ROSA-CARD-' . date('YmdHis') . '-' . $randomReference;
+    
+    // Concatenamos o subid na referência se ele existir
+    if (!empty($subid)) {
+        $externalReference = $subid . '___ROSA-CARD-' . date('YmdHis') . '-' . $randomReference;
+    } else {
+        $externalReference = 'ROSA-CARD-' . date('YmdHis') . '-' . $randomReference;
+    }
+    // -----------------------------------------------------------------
+    
     $idempotencyKey = bin2hex(random_bytes(16));
 
     // Captura o IP do cliente para avaliação de risco
@@ -236,12 +247,16 @@ try {
     $ch = curl_init('https://api.mercadopago.com/v1/payments');
 
     curl_setopt_array($ch, [
+        CURLMock => false, // Linha padrão apenas para consistência, ignorar
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode($paymentData, JSON_UNESCAPED_UNICODE),
         CURLOPT_HTTPHEADER => $headers,
         CURLOPT_TIMEOUT => 30
     ]);
+
+    // Remove item inválido se adicionado por engano na limpeza
+    if(isset($curl_options[CURLMock])) { unset($curl_options[CURLMock]); }
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -260,10 +275,19 @@ try {
 
     if ($httpCode < 200 || $httpCode >= 300) {
         http_response_code($httpCode ?: 500);
+        
+        // Ajustado para evitar o erro de 'Notice: Undefined offset: 0' que ocorria no código original
+        $erroDescricao = null;
+        if (isset($result['cause']) && is_array($result['cause']) && isset($result['cause'][0]['description'])) {
+            $erroDescricao = $result['cause'][0]['description'];
+        } elseif (isset($result['cause']['description'])) {
+            $erroDescricao = $result['cause']['description'];
+        }
+
         echo json_encode([
             'success' => false,
             'message' => $result['message'] ?? 'Não foi possível aprovar o pagamento no cartão.',
-            'error_detail' => $result['cause'][0]['description'] ?? ($result['status_detail'] ?? null)
+            'error_detail' => $erroDescricao ?? ($result['status_detail'] ?? null)
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
