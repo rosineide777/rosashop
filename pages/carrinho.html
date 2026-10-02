@@ -470,6 +470,22 @@
       margin-bottom: 14px;
     }
 
+    /* ESTILOS PARA RECONHECIMENTO DO CARTÃO */
+    .card-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .card-brand-icon {
+      position: absolute;
+      right: 10px;
+      height: 24px;
+      max-width: 40px;
+      object-fit: contain;
+      display: none;
+    }
+
     /* MODAL PIX */
     .pix-area {
       display: none;
@@ -860,6 +876,7 @@
                 class="form-input"
                 placeholder="(00) 00000-0000"
                 autocomplete="tel"
+                oninput="mascaraTelefone(this)"
               >
 
             </div>
@@ -887,6 +904,7 @@
                 placeholder="00000-000"
                 maxlength="9"
                 autocomplete="postal-code"
+                oninput="mascaraCEP(this)"
               >
 
             </div>
@@ -1071,38 +1089,41 @@
               <div class="card-method-box">
                 <div class="form-group">
                   <label class="form-label">Número do Cartão <span class="required">*</span></label>
-                  <input type="text" id="cardNumber" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19" oninput="consultarParcelas()">
+                  <div class="card-input-wrapper">
+                    <input type="text" id="cardNumber" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatarEConsultarCartao(this)">
+                    <img id="cardBrandIcon" class="card-brand-icon" alt="Bandeira do Cartão" src="" />
+                  </div>
                 </div>
 
                 <div class="form-group">
                   <label class="form-label">Nome impresso no Cartão <span class="required">*</span></label>
-                  <input type="text" id="cardholderName" class="form-input" placeholder="Como está no cartão">
+                  <input type="text" id="cardholderName" class="form-input" placeholder="Como está no cartão" style="text-transform: uppercase;">
                 </div>
 
                 <div class="form-row-three">
                   <div class="form-group">
                     <label class="form-label">Mês <span class="required">*</span></label>
-                    <input type="text" id="expirationMonth" class="form-input" placeholder="MM" maxlength="2">
+                    <input type="text" id="expirationMonth" class="form-input" placeholder="MM" maxlength="2" oninput="mascaraApenasNumeros(this)">
                   </div>
                   <div class="form-group">
                     <label class="form-label">Ano <span class="required">*</span></label>
-                    <input type="text" id="expirationYear" class="form-input" placeholder="AA ou AAAA" maxlength="4">
+                    <input type="text" id="expirationYear" class="form-input" placeholder="AA ou AAAA" maxlength="4" oninput="mascaraApenasNumeros(this)">
                   </div>
                   <div class="form-group">
                     <label class="form-label">CVV <span class="required">*</span></label>
-                    <input type="text" id="securityCode" class="form-input" placeholder="123" maxlength="4">
+                    <input type="text" id="securityCode" class="form-input" placeholder="123" maxlength="4" oninput="mascaraApenasNumeros(this)">
                   </div>
                 </div>
 
                 <div class="form-group">
                   <label class="form-label">CPF do Titular <span class="required">*</span></label>
-                  <input type="text" id="cardholderCpf" class="form-input" placeholder="000.000.000-00" maxlength="14">
+                  <input type="text" id="cardholderCpf" class="form-input" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)">
                 </div>
 
                 <div class="form-group">
                   <label class="form-label">Opções de Parcelamento <span class="required">*</span></label>
                   <select id="installments" class="form-input">
-                    <option value="1">1x à vista</option>
+                    <option value="1">Digite os números do cartão para carregar as parcelas...</option>
                   </select>
                 </div>
               </div>
@@ -1308,24 +1329,92 @@ function selecionarMetodo(metodo) {
   }
 }
 
+/* FUNÇÕES DE MÁSCARA E FORMATO */
+function mascaraApenasNumeros(input) {
+  input.value = input.value.replace(/\D/g, '');
+}
 
-/* CONSULTAR PARCELAS VIA SDK DO MERCADO PAGO */
+function mascaraCPF(input) {
+  let v = input.value.replace(/\D/g, '');
+  v = v.substring(0, 11);
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  input.value = v;
+}
+
+function mascaraTelefone(input) {
+  let v = input.value.replace(/\D/g, '');
+  v = v.substring(0, 11);
+  if (v.length > 10) {
+    v = v.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  } else {
+    v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+  }
+  input.value = v;
+}
+
+function mascaraCEP(input) {
+  let v = input.value.replace(/\D/g, '');
+  v = v.substring(0, 8);
+  v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+  input.value = v;
+}
+
+function formatarEConsultarCartao(input) {
+  let v = input.value.replace(/\D/g, '');
+  v = v.substring(0, 16);
+  v = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+  input.value = v;
+  consultarParcelas();
+}
+
+
+/* CONSULTAR PARCELAS E BANDEIRA VIA SDK DO MERCADO PAGO */
 async function consultarParcelas() {
   const cardNumberInput = document.getElementById('cardNumber');
+  const cardBrandIcon = document.getElementById('cardBrandIcon');
   if (!cardNumberInput) return;
 
   const rawNumber = cardNumberInput.value.replace(/\D/g, '');
+  
+  if (rawNumber.length < 6) {
+    if (cardBrandIcon) {
+      cardBrandIcon.style.display = 'none';
+      cardBrandIcon.src = '';
+    }
+    const selectInstallments = document.getElementById('installments');
+    if (selectInstallments) {
+      selectInstallments.innerHTML = '<option value="1">Digite os números do cartão para carregar as parcelas...</option>';
+    }
+    return;
+  }
+
   if (rawNumber.length >= 6 && mp) {
     const bin = rawNumber.substring(0, 6);
     try {
-      const totalAmount = getCartTotal().toFixed(2);
+      // Reconhecimento da bandeira
+      const paymentMethods = await mp.getPaymentMethods({ bin: bin });
+      if (paymentMethods && paymentMethods.results && paymentMethods.results.length > 0) {
+        const pm = paymentMethods.results[0];
+        detectedPaymentMethodId = pm.id;
+        if (cardBrandIcon && pm.secure_thumbnail) {
+          cardBrandIcon.src = pm.secure_thumbnail;
+          cardBrandIcon.style.display = 'block';
+        }
+      }
+
+      // Consulta das opções de parcelamento
+      const totalAmount = getCartTotal();
+      if (totalAmount <= 0) return;
+
       const installmentsData = await mp.getInstallments({
-        amount: totalAmount,
+        amount: totalAmount.toFixed(2),
         bin: bin
       });
 
       if (installmentsData && installmentsData.length > 0) {
-        detectedPaymentMethodId = installmentsData[0].payment_method_id || 'visa';
+        detectedPaymentMethodId = installmentsData[0].payment_method_id || detectedPaymentMethodId;
         detectedIssuerId = installmentsData[0].issuer?.id || null;
         
         const payerCosts = installmentsData[0].payer_costs || [];
@@ -1335,12 +1424,12 @@ async function consultarParcelas() {
         payerCosts.forEach(cost => {
           const opt = document.createElement('option');
           opt.value = cost.installments;
-          opt.textContent = `${cost.installments}x de R$ ${Number(cost.installment_amount).toFixed(2)} (${cost.recommended_message || 'Total: R$ ' + Number(cost.total_amount).toFixed(2)})`;
+          opt.textContent = `${cost.installments}x de R$ ${Number(cost.installment_amount).toFixed(2).replace('.', ',')} (${cost.recommended_message || 'Total: R$ ' + Number(cost.total_amount).toFixed(2).replace('.', ',')})`;
           selectInstallments.appendChild(opt);
         });
       }
     } catch (err) {
-      console.log('Erro ao buscar parcelas:', err);
+      console.log('Erro ao buscar informações do cartão/parcelas:', err);
     }
   }
 }
@@ -1399,6 +1488,17 @@ async function pagarComCartao() {
       throw new Error("SDK do Mercado Pago não foi inicializado.");
     }
 
+    // Capture do Device ID do Mercado Pago para Antifraude
+    let deviceId = "";
+    try {
+      if (typeof mp.getDeviceProfile === "function") {
+        const profile = await mp.getDeviceProfile();
+        deviceId = profile?.device_id || "";
+      }
+    } catch (devErr) {
+      console.warn("Não foi possível obter o Device Profile:", devErr);
+    }
+
     // 1. Gera o token seguro do cartão no Mercado Pago
     const cardToken = await mp.createCardToken({
       cardNumber: cardNumber,
@@ -1419,7 +1519,7 @@ async function pagarComCartao() {
       quantity: getItemQuantity(item)
     }));
 
-    // 2. Envia para o backend PHP
+    // 2. Envia para o backend PHP incluindo o device_id
     const response = await fetch("/api/criar_cartao.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1428,6 +1528,7 @@ async function pagarComCartao() {
         payment_method_id: detectedPaymentMethodId,
         installments: installments,
         issuer_id: detectedIssuerId,
+        device_id: deviceId,
         name: nome,
         email: email,
         phone: telefone,

@@ -6,6 +6,30 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json; charset=utf-8');
 
+/**
+ * Função para validar os dígitos verificadores do CPF
+ */
+function validarCPF(string $cpf): bool {
+    $cpf = preg_replace('/\D+/', '', $cpf);
+    
+    if (strlen($cpf) !== 11 || preg_match('/^(\d)\1{10}$/', $cpf)) {
+        return false;
+    }
+
+    for ($t = 9; $t < 11; $t++) {
+        $d = 0;
+        for ($c = 0; $c < $t; $c++) {
+            $d += (int)$cpf[$c] * (($t + 1) - $c);
+        }
+        $d = ((10 * $d) % 11) % 10;
+        if ((int)$cpf[$c] !== $d) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 try {
     require_once __DIR__ . '/config.php';
 
@@ -36,7 +60,8 @@ try {
     $token = trim((string)($input['token'] ?? ''));
     $paymentMethodId = trim((string)($input['payment_method_id'] ?? 'visa'));
     $installments = (int)($input['installments'] ?? 1);
-    $issuerId = isset($input['issuer_id']) && !empty($input['issuer_id']) ? (string)$input['issuer_id'] : null;
+    $issuerId = !empty($input['issuer_id']) ? (string)$input['issuer_id'] : null;
+    $deviceId = trim((string)($input['device_id'] ?? ''));
 
     if (empty($token)) {
         http_response_code(400);
@@ -63,9 +88,9 @@ try {
         exit;
     }
 
-    if (strlen($cpf) !== 11) {
+    if (!validarCPF($cpf)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Informe um CPF válido com 11 dígitos.'], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['success' => false, 'message' => 'Informe um CPF válido.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -154,6 +179,12 @@ try {
     $externalReference = 'ROSA-CARD-' . date('YmdHis') . '-' . $randomReference;
     $idempotencyKey = bin2hex(random_bytes(16));
 
+    // Captura o IP do cliente para avaliação de risco
+    $clientIp = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+    if ($clientIp && strpos($clientIp, ',') !== false) {
+        $clientIp = trim(explode(',', $clientIp)[0]);
+    }
+
     // Payload de Pagamento por Cartão no Mercado Pago
     $paymentData = [
         'transaction_amount' => $total,
@@ -172,7 +203,8 @@ try {
             ]
         ],
         'additional_info' => [
-            'items' => $mpItems
+            'items' => $mpItems,
+            'ip_address' => $clientIp
         ]
     ];
 
@@ -187,6 +219,19 @@ try {
         ];
     }
 
+    // Configuração dos Cabeçalhos HTTP
+    $headers = [
+        'Accept: application/json',
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . MP_ACCESS_TOKEN,
+        'X-Idempotency-Key: ' . $idempotencyKey
+    ];
+
+    // Se o Device ID veio do frontend, envia o cabeçalho antifraude do Mercado Pago
+    if (!empty($deviceId)) {
+        $headers[] = 'X-Melidata-Session-Id: ' . $deviceId;
+    }
+
     // Requisição cURL
     $ch = curl_init('https://api.mercadopago.com/v1/payments');
 
@@ -194,12 +239,7 @@ try {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode($paymentData, JSON_UNESCAPED_UNICODE),
-        CURLOPT_HTTPHEADER => [
-            'Accept: application/json',
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . MP_ACCESS_TOKEN,
-            'X-Idempotency-Key: ' . $idempotencyKey
-        ],
+        CURLOPT_HTTPHEADER => $headers,
         CURLOPT_TIMEOUT => 30
     ]);
 
