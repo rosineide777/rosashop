@@ -58,8 +58,8 @@ if ($paymentId === null || !ctype_digit($paymentId)) {
 |--------------------------------------------------------------------------
 */
 
-// CORRIGIDO: Rota oficial completa para a API do Mercado Pago consultar o ID
-$url = 'https://mercadopago.com' . urlencode($paymentId);
+// CORRIGIDO: URL oficial e completa da API do Mercado Pago para buscar o pagamento
+$url = 'https://api.mercadopago.com/v1/payments/' . $paymentId;
 
 $ch = curl_init($url);
 curl_setopt_array($ch, [
@@ -77,12 +77,12 @@ $curlError = curl_error($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-if ($response === false || $curlError !== '') {
+if ($response === false || $curlError !== '' || $httpCode >= 400) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'error' => 'Erro ao consultar o pagamento.',
-        'details' => $curlError
+        'details' => $curlError !== '' ? $curlError : "HTTP Code: $httpCode"
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -119,8 +119,8 @@ if ($status === 'approved') {
         $clickId = isset($partes[0]) ? trim($partes[0]) : '';
         
         if (!empty($clickId)) {
-            // CORRIGIDO: Link e parâmetros 100% alinhados para a sua conta do BeMob
-            $bemobPostbackUrl = "https://bemobtrcks.com" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount);
+            // CORRIGIDO: Estrutura padrão de postback do BeMob (confirme se o seu domínio usa ?clickid= ou outro parâmetro)
+            $bemobPostbackUrl = "https://bemobtrcks.com/postback?clickid=" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount);
             
             // Dispara a chamada silenciosa S2S para o servidor do BeMob
             $chBemob = curl_init($bemobPostbackUrl);
