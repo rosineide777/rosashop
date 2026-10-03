@@ -199,7 +199,7 @@ try {
         ],
         'produto13' => [
             'name' => 'Terapia Ortopédica 4 em 1 para Joelho',
-            'price' => 1.00
+            'price' => 99.90
         ],
         'produto14' => [
             'name' => 'iPhone 17 Pro Max 256GB',

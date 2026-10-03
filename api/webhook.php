@@ -58,7 +58,6 @@ if ($paymentId === null || !ctype_digit($paymentId)) {
 |--------------------------------------------------------------------------
 */
 
-// CORRIGIDO: URL oficial e completa da API do Mercado Pago para buscar o pagamento
 $url = 'https://api.mercadopago.com/v1/payments/' . $paymentId;
 
 $ch = curl_init($url);
@@ -111,18 +110,22 @@ $externalReference = $payment['external_reference'] ?? null;
 
 if ($status === 'approved') {
 
-    // --- INTEGRALIZAÇÃO ATIVA BEMOB POSTBACK ---
-    if (!empty($externalReference) && is_string($externalReference) && strpos($externalReference, '___') !== false) {
+    // --- INTEGRALIZAÇÃO ATIVA BEMOB POSTBACK (CORRIGIDA) ---
+    if (!empty($externalReference) && is_string($externalReference)) {
         
-        // Separa o clickId do BeMob que guardamos antes do '___'
-        $partes = explode('___', $externalReference);
-        $clickId = isset($partes[0]) ? trim($partes[0]) : '';
+        // Trata external_reference recebido com ou sem sufixo ___
+        if (strpos($externalReference, '___') !== false) {
+            $partes = explode('___', $externalReference);
+            $clickId = isset($partes[0]) ? trim($partes[0]) : '';
+        } else {
+            $clickId = trim($externalReference);
+        }
         
         if (!empty($clickId)) {
-            // CORRIGIDO: Estrutura padrão de postback do BeMob (confirme se o seu domínio usa ?clickid= ou outro parâmetro)
-            $bemobPostbackUrl = "https://bemobtrcks.com/postback?clickid=" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount);
+            // URL oficial da BeMob com parâmetro cid= e subdomínio correto
+            $bemobPostbackUrl = "http://37bn3.bemobtrcks.com/postback?cid=" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount);
             
-            // Dispara a chamada silenciosa S2S para o servidor do BeMob
+            // Dispara a chamada S2S silenciosa para o BeMob
             $chBemob = curl_init($bemobPostbackUrl);
             curl_setopt_array($chBemob, [
                 CURLOPT_RETURNTRANSFER => true,
@@ -133,7 +136,7 @@ if ($status === 'approved') {
             curl_close($chBemob);
         }
     }
-    // -------------------------------------------
+    // ------------------------------------------------------
 }
 
 /*
