@@ -108,7 +108,7 @@ try {
         'produto10' => ['name' => 'Cooktop Itatiaia Essencial 4 Bocas cor Preto', 'price' => 99.90],
         'produto11' => ['name' => 'Jogo de Panelas Cerâmica Kit 5 Peças Antiaderente Tampa Vidro', 'price' => 49.90],
         'produto12' => ['name' => 'Smart Tv Samsung 85 - 4k Crystal Ultra Hd Led Lh85befhSmart Tv Samsung 85 - 4k Crystal Ultra Hd Led Lh85befh', 'price' => 799.90],
-        'produto13' => ['name' => 'Terapia Ortopédica 4 em 1 para Joelho', 'price' => 99.90],
+        'produto13' => ['name' => 'Terapia Ortopédica 4 em 1 para Joelho', 'price' => 1.00],
         'produto14' => ['name' => 'iPhone 17 Pro Max 256GB', 'price' => 999.90],
     ];
 
