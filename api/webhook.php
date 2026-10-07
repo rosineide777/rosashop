@@ -121,7 +121,7 @@ if ($paymentId === '123456789') {
 
 /*
 |--------------------------------------------------------------------------
-| PROCESSAMENTO DO ENVIO DIRETO PARA O TIKTOK
+| PROCESSAMENTO DO ENVIO DIRETO PARA A API DE CONVERSÕES DO TIKTOK
 |--------------------------------------------------------------------------
 */
 
@@ -142,16 +142,41 @@ if ($status === 'approved') {
         }
         
         if (!empty($clickId)) {
-            // URL de conversão direta do TikTok com o seu Pixel, Token e clickId
-            $tiktokUrl = "https://analytics.tiktok.com/api/v2/pixel/conversion?pixel_id=DAVURN3C77U77GG17K20&token=fd86247944ec5910d3c2a608eb47d3b2077a323a&event=CompletePayment&context.ad.callback_id=" . urlencode($clickId) . "&test_event_code=TEST34244";
+            // Endpoint oficial da API de Conversões do TikTok v1.3
+            $tiktokUrl = "https://business-api.tiktok.com/open_api/v1.3/pixel/track/";
             
+            // Payload estruturado exigido pela API do TikTok
+            $payload = [
+                "pixel_code" => "DAVURN3C77U77GG17K20",
+                "event" => "CompletePayment",
+                "event_source" => "server",
+                "test_event_code" => "TEST34244",
+                "data" => [
+                    [
+                        "value" => (float) $transactionAmount,
+                        "currency" => "BRL",
+                        "context" => [
+                            "ad" => [
+                                "callback_id" => $clickId
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
             $chTiktok = curl_init($tiktokUrl);
             curl_setopt_array($chTiktok, [
                 CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($payload),
                 CURLOPT_TIMEOUT => 15,
                 CURLOPT_CONNECTTIMEOUT => 5,
                 CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+                CURLOPT_HTTPHEADER => [
+                    "Content-Type: application/json",
+                    "Access-Token: fd86247944ec5910d3c2a608eb47d3b2077a323a"
+                ],
+                CURLOPT_USERAGENT => 'Webhook-Engine/1.0'
             ]);
             
             $tiktokResponse = curl_exec($chTiktok);
