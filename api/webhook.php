@@ -121,11 +121,11 @@ if ($paymentId === '123456789') {
 
 /*
 |--------------------------------------------------------------------------
-| PROCESSAMENTO DO POSTBACK BEMOB
+| PROCESSAMENTO DO ENVIO DIRETO PARA O TIKTOK
 |--------------------------------------------------------------------------
 */
 
-$bemobSent = false;
+$tiktokSent = false;
 
 if ($status === 'approved') {
 
@@ -139,11 +139,11 @@ if ($status === 'approved') {
         }
         
         if (!empty($clickId)) {
-            // URL oficial do BeMob com o código de teste do TikTok incluído
-            $bemobPostbackUrl = "https://37bn3.bemobtrcks.com/postback?cid=" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount) . "&test_event_code=TEST34244";
+            // URL de conversão direta do TikTok com o seu Pixel, Token e clickId
+            $tiktokUrl = "https://analytics.tiktok.com/api/v2/pixel/conversion?pixel_id=DAVURN3C77U77GG17K20&token=fd86247944ec5910d3c2a608eb47d3b2077a323a&event=CompletePayment&context.ad.callback_id=" . urlencode($clickId) . "&test_event_code=TEST34244";
             
-            $chBemob = curl_init($bemobPostbackUrl);
-            curl_setopt_array($chBemob, [
+            $chTiktok = curl_init($tiktokUrl);
+            curl_setopt_array($chTiktok, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 15,
                 CURLOPT_CONNECTTIMEOUT => 5,
@@ -151,12 +151,12 @@ if ($status === 'approved') {
                 CURLOPT_USERAGENT => 'Webhook-Engine/1.0'
             ]);
             
-            $bemobResponse = curl_exec($chBemob);
-            $bemobHttpCode = curl_getinfo($chBemob, CURLINFO_HTTP_CODE);
-            curl_close($chBemob);
+            $tiktokResponse = curl_exec($chTiktok);
+            $tiktokHttpCode = curl_getinfo($chTiktok, CURLINFO_HTTP_CODE);
+            curl_close($chTiktok);
 
-            if ($bemobHttpCode >= 200 && $bemobHttpCode < 300) {
-                $bemobSent = true;
+            if ($tiktokHttpCode >= 200 && $tiktokHttpCode < 300) {
+                $tiktokSent = true;
             }
         }
     }
@@ -171,10 +171,10 @@ if ($status === 'approved') {
 http_response_code(200);
 echo json_encode([
     'success' => true,
-    'message' => 'Webhook processado com sucesso.',
+    'message' => 'Webhook processado e enviado ao TikTok com sucesso.',
     'payment_id' => $paymentId,
     'status' => $status,
-    'bemob_postback_sent' => $bemobSent
+    'tiktok_sent' => $tiktokSent
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 exit;
