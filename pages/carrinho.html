@@ -3045,13 +3045,13 @@ async function consultarPagamento() {
 
   try {
 
-    const response =
-      await fetch(
-        "../api/consultar_pix.php?payment_id=" +
-        encodeURIComponent(
-          currentPaymentId
-        )
-      );
+const response =
+  await fetch(
+    "/api/consultar_pix.php?payment_id=" +
+    encodeURIComponent(
+      currentPaymentId
+    )
+  );
 
 
     const result =
