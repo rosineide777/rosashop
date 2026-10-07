@@ -66,6 +66,7 @@ if ($paymentId === null || !ctype_digit($paymentId)) {
 $status = 'approved';
 $statusDetail = 'accredited';
 $transactionAmount = 100.00;
+$payerEmail = 'sem-email@checkout.com';
 
 if ($paymentId === '123456789') {
     // Modo de simulação para testes manuais
@@ -117,6 +118,7 @@ if ($paymentId === '123456789') {
     $statusDetail = $payment['status_detail'] ?? null;
     $transactionAmount = isset($payment['transaction_amount']) ? (float) $payment['transaction_amount'] : 0;
     $externalReference = $payment['external_reference'] ?? null;
+    $payerEmail = $payment['payer']['email'] ?? 'sem-email@checkout.com';
 }
 
 /*
@@ -145,19 +147,35 @@ if ($status === 'approved') {
             // Endpoint oficial da API de Conversões do TikTok v1.3
             $tiktokUrl = "https://business-api.tiktok.com/open_api/v1.3/pixel/track/";
             
-            // Payload estruturado exigido pela API do TikTok
+            // Gera o hash SHA256 do e-mail do cliente exigido pelo TikTok
+            $emailHash = hash('sha256', strtolower(trim($payerEmail)));
+
+            // Payload estruturado corrigido para produção (sem modo de teste)
             $payload = [
                 "pixel_code" => "DAVURN3C77U77GG17K20",
                 "event" => "CompletePayment",
                 "event_source" => "PIXEL_EVENTS",
-                "test_event_code" => "TEST34244",
                 "data" => [
                     [
+                        "event_time" => time(),
                         "value" => (float) $transactionAmount,
                         "currency" => "BRL",
+                        "user_data" => [
+                            "email" => [$emailHash]
+                        ],
                         "context" => [
                             "ad" => [
                                 "callback_id" => $clickId
+                            ]
+                        ],
+                        "properties" => [
+                            "contents" => [
+                                [
+                                    "content_id" => "produto_principal",
+                                    "content_type" => "product",
+                                    "quantity" => 1,
+                                    "price" => (float) $transactionAmount
+                                ]
                             ]
                         ]
                     ]
