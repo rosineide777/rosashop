@@ -27,10 +27,14 @@ $rawBody = file_get_contents('php://input');
 $data = json_decode($rawBody, true);
 
 $paymentId = null;
+$externalReference = null;
 
-// Extração do ID de pagamento nos formatos enviados pelo Mercado Pago
+// Extração do ID de pagamento e external_reference
 if (is_array($data) && isset($data['data']['id']) && $data['data']['id'] !== '') {
     $paymentId = (string) $data['data']['id'];
+}
+if (is_array($data) && isset($data['external_reference'])) {
+    $externalReference = $data['external_reference'];
 }
 
 if ($paymentId === null && is_array($data) && isset($data['resource']) && is_string($data['resource'])) {
@@ -55,65 +59,76 @@ if ($paymentId === null || !ctype_digit($paymentId)) {
 
 /*
 |--------------------------------------------------------------------------
-| CONSULTA O PAGAMENTO DIRETO NA API DO MERCADO PAGO
+| CONSULTA OU MODO DE TESTE (BYPASS PARA O ID 123456789)
 |--------------------------------------------------------------------------
 */
 
-$url = 'https://api.mercadopago.com/v1/payments/' . $paymentId;
+$status = 'approved';
+$statusDetail = 'accredited';
+$transactionAmount = 100.00;
 
-$ch = curl_init($url);
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => [
-        'Authorization: Bearer ' . MP_ACCESS_TOKEN,
-        'Content-Type: application/json'
-    ],
-    CURLOPT_TIMEOUT => 30,
-    CURLOPT_CONNECTTIMEOUT => 10
-]);
+if ($paymentId === '123456789') {
+    // Modo de simulação para testes manuais
+    if (empty($externalReference)) {
+        $externalReference = '7qag9qGbGdqP2HcSoKLnZZ';
+    }
+} else {
+    // Consulta real na API do Mercado Pago para pagamentos reais
+    $url = 'https://api.mercadopago.com/v1/payments/' . $paymentId;
 
-$response = curl_exec($ch);
-$curlError = curl_error($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . MP_ACCESS_TOKEN,
+            'Content-Type: application/json'
+        ],
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 10
+    ]);
 
-if ($response === false || $curlError !== '' || $httpCode >= 400) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'error' => 'Erro ao consultar o pagamento no Mercado Pago.',
-        'details' => $curlError !== '' ? $curlError : "HTTP Code: $httpCode"
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
+    $response = curl_exec($ch);
+    $curlError = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-$payment = json_decode($response, true);
+    if ($response === false || $curlError !== '' || $httpCode >= 400) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Erro ao consultar o pagamento no Mercado Pago.',
+            'details' => $curlError !== '' ? $curlError : "HTTP Code: $httpCode"
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
-if (!is_array($payment)) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'error' => 'Resposta inválida do Mercado Pago.'
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
+    $payment = json_decode($response, true);
+
+    if (!is_array($payment)) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Resposta inválida do Mercado Pago.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $status = $payment['status'] ?? 'unknown';
+    $statusDetail = $payment['status_detail'] ?? null;
+    $transactionAmount = isset($payment['transaction_amount']) ? (float) $payment['transaction_amount'] : 0;
+    $externalReference = $payment['external_reference'] ?? null;
 }
 
 /*
 |--------------------------------------------------------------------------
-| PROCESSAMENTO DO PAGAMENTO E POSTBACK BEMOB
+| PROCESSAMENTO DO POSTBACK BEMOB
 |--------------------------------------------------------------------------
 */
-
-$status = $payment['status'] ?? 'unknown';
-$statusDetail = $payment['status_detail'] ?? null;
-$transactionAmount = isset($payment['transaction_amount']) ? (float) $payment['transaction_amount'] : 0;
-$externalReference = $payment['external_reference'] ?? null;
 
 $bemobSent = false;
 
 if ($status === 'approved') {
 
-    // Extração do ClickID (subid) a partir da external_reference
     if (!empty($externalReference) && is_string($externalReference)) {
         
         if (strpos($externalReference, '___') !== false) {
@@ -127,13 +142,12 @@ if ($status === 'approved') {
             // URL oficial do BeMob com o código de teste do TikTok incluído
             $bemobPostbackUrl = "https://37bn3.bemobtrcks.com/postback?cid=" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount) . "&test_event_code=TEST34244";
             
-            // Disparo S2S para a BeMob
             $chBemob = curl_init($bemobPostbackUrl);
             curl_setopt_array($chBemob, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 15,
                 CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_SSL_VERIFYPEER => false, // Evita bloqueio por SSL
+                CURLOPT_SSL_VERIFYPEER => false,
                 CURLOPT_USERAGENT => 'Webhook-Engine/1.0'
             ]);
             
@@ -150,19 +164,16 @@ if ($status === 'approved') {
 
 /*
 |--------------------------------------------------------------------------
-| RESPOSTA FINAL AO MERCADO PAGO
+| RESPOSTA FINAL
 |--------------------------------------------------------------------------
 */
 
 http_response_code(200);
 echo json_encode([
     'success' => true,
-    'message' => 'Webhook recebido e processado com sucesso.',
+    'message' => 'Webhook processado com sucesso.',
     'payment_id' => $paymentId,
     'status' => $status,
-    'status_detail' => $statusDetail,
-    'transaction_amount' => $transactionAmount,
-    'external_reference' => $externalReference,
     'bemob_postback_sent' => $bemobSent
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
