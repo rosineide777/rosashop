@@ -1745,6 +1745,33 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem('bemob_cid', cid_da_url);
         console.log('[BeMob] ClickID capturado e guardado:', cid_da_url);
     }
+
+    // 3. Obtém o CID ativo (da URL ou do localStorage)
+    const activeCid = cid_da_url || localStorage.getItem('bemob_cid');
+
+    // 4. Injeta o CID nos links internos da página para mantê-lo visível na navegação
+    if (activeCid) {
+        document.querySelectorAll('a[href]').forEach(link => {
+            const href = link.getAttribute('href');
+            
+            if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:')) {
+                return;
+            }
+
+            try {
+                const url = new URL(href, window.location.origin);
+                if (url.origin === window.location.origin) {
+                    url.searchParams.set('cid', activeCid);
+                    link.setAttribute('href', url.pathname + url.search + url.hash);
+                }
+            } catch (e) {
+                if (!href.includes('http')) {
+                    const separator = href.includes('?') ? '&' : '?';
+                    link.setAttribute('href', href + separator + 'cid=' + encodeURIComponent(activeCid));
+                }
+            }
+        });
+    }
 });
 
 // Função global para pegar o ClickID correto no momento do envio do Pix/Checkout
@@ -1753,5 +1780,6 @@ function getBeMobClickId() {
     return urlParams.get('cid') || urlParams.get('subid') || localStorage.getItem('bemob_cid') || '';
 }
 </script>
+
 </body>
 </html>
