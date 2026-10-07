@@ -28,7 +28,7 @@
     const PRODUCT_DATA = {
       id: "produto13",
       name: "Terapia Ortopédica 4 em 1 para Joelho",
-      price: 1.00,
+      price: 99.90,
       currency: "BRL",
       category: "Saude",
       image: "https://acdn-us.mitiendanube.com/stores/002/614/011/products/chatgpt-image-10-de-ago-de-2026-11_49_17-a5eb9ec7720d1b382d17863733803073-1024-1024.webp",
@@ -2083,22 +2083,16 @@ Produto Original: Sim<br><br>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Lê o 'cid' ou 'subid' da URL
+    // 1. Lê os parâmetros que estão na URL da barra de endereço
     const urlParams = new URLSearchParams(window.location.search);
-    const cid_da_url = urlParams.get('cid') || urlParams.get('subid');
+    const subid_da_url = urlParams.get('subid');
 
-    // 2. Se encontrou na URL, salva no localStorage como 'bemob_cid'
-    if (cid_da_url) {
-        localStorage.setItem('bemob_cid', cid_da_url);
-        console.log('[BeMob] ClickID capturado e guardado:', cid_da_url);
+    // 2. Se encontrou o subid na URL, salva ele no navegador do cliente
+    if (subid_da_url) {
+        localStorage.setItem('bemob_subid', subid_da_url);
+        console.log('Subid do BeMob capturado e guardado:', subid_da_url);
     }
 });
-
-// Função global para pegar o ClickID correto no momento do envio do Pix/Checkout
-function getBeMobClickId() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('cid') || urlParams.get('subid') || localStorage.getItem('bemob_cid') || '';
-}
 </script>
 
 </body>

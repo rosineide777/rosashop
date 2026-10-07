@@ -1154,7 +1154,7 @@ document.addEventListener(
         <div class="product-card" onclick="trackProductClick({
             id: 'produto13',
             name: 'Terapia Ortopédica 4em1 para Joelho',
-            price: 1.00,
+            price: 99.90,
             image: 'https://acdn-us.mitiendanube.com/stores/001/680/726/products/articure-massageador-ortopedico-para-joelhos-4-em-1-4b4868f13ac1e59fd417263148920827-1024-1024.png',
             url: './pages/produto13.html'
           })">
@@ -1174,7 +1174,7 @@ document.addEventListener(
           <button class="btn-add-cart" onclick="addToCart(event, {
             id: 'produto13',
             name: 'Terapia Ortopédica 4em1 para Joelho',
-            price: 1.00,
+            price: 99.90,
             image: 'https://acdn-us.mitiendanube.com/stores/001/680/726/products/articure-massageador-ortopedico-para-joelhos-4-em-1-4b4868f13ac1e59fd417263148920827-1024-1024.png'
           })">Adicionar ao Carrinho</button>
         </div>
@@ -1978,24 +1978,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
   </script>
 
-<script>
+  <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Lê o 'cid' ou 'subid' da URL
+    // 1. Lê os parâmetros que estão na URL da barra de endereço
     const urlParams = new URLSearchParams(window.location.search);
-    const cid_da_url = urlParams.get('cid') || urlParams.get('subid');
+    const subid_da_url = urlParams.get('subid');
 
-    // 2. Se encontrou na URL, salva no localStorage como 'bemob_cid'
-    if (cid_da_url) {
-        localStorage.setItem('bemob_cid', cid_da_url);
-        console.log('[BeMob] ClickID capturado e guardado:', cid_da_url);
+    // 2. Se encontrou o subid na URL, salva ele no navegador do cliente
+    if (subid_da_url) {
+        localStorage.setItem('bemob_subid', subid_da_url);
+        console.log('Subid do BeMob capturado e guardado:', subid_da_url);
     }
 });
-
-// Função global para pegar o ClickID correto no momento do envio do Pix/Checkout
-function getBeMobClickId() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('cid') || urlParams.get('subid') || localStorage.getItem('bemob_cid') || '';
-}
 </script>
 
 

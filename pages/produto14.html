@@ -2353,22 +2353,16 @@ Produto original, veio lacrado e com prazo de entrega super rápido.
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Lê o 'cid' ou 'subid' da URL
+    // 1. Lê os parâmetros que estão na URL da barra de endereço
     const urlParams = new URLSearchParams(window.location.search);
-    const cid_da_url = urlParams.get('cid') || urlParams.get('subid');
+    const subid_da_url = urlParams.get('subid');
 
-    // 2. Se encontrou na URL, salva no localStorage como 'bemob_cid'
-    if (cid_da_url) {
-        localStorage.setItem('bemob_cid', cid_da_url);
-        console.log('[BeMob] ClickID capturado e guardado:', cid_da_url);
+    // 2. Se encontrou o subid na URL, salva ele no navegador do cliente
+    if (subid_da_url) {
+        localStorage.setItem('bemob_subid', subid_da_url);
+        console.log('Subid do BeMob capturado e guardado:', subid_da_url);
     }
 });
-
-// Função global para pegar o ClickID correto no momento do envio do Pix/Checkout
-function getBeMobClickId() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('cid') || urlParams.get('subid') || localStorage.getItem('bemob_cid') || '';
-}
 </script>
 
 </body>
