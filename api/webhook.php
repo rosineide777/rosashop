@@ -149,7 +149,7 @@ if ($status === 'approved') {
             $payload = [
                 "pixel_code" => "DAVURN3C77U77GG17K20",
                 "event" => "CompletePayment",
-                "event_source" => "server",
+                "event_source" => "PIXEL_EVENTS",
                 "test_event_code" => "TEST34244",
                 "data" => [
                     [
