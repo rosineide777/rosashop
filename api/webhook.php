@@ -124,8 +124,8 @@ if ($status === 'approved') {
         }
         
         if (!empty($clickId)) {
-            // URL oficial do BeMob (Usando HTTPS para garantir o envio)
-            $bemobPostbackUrl = "https://37bn3.bemobtrcks.com/postback?cid=" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount);
+            // URL oficial do BeMob com o código de teste do TikTok incluído
+            $bemobPostbackUrl = "https://37bn3.bemobtrcks.com/postback?cid=" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount) . "&test_event_code=TEST34244";
             
             // Disparo S2S para a BeMob
             $chBemob = curl_init($bemobPostbackUrl);
