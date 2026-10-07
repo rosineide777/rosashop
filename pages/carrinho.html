@@ -3441,92 +3441,48 @@ document.addEventListener(
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Garante a captura e salvamento do subid se ele vier na URL
+    // 1. Busca o Click ID na URL testando os nomes de parâmetros mais comuns da BeMob
     const urlParams = new URLSearchParams(window.location.search);
-    const subidUrl = urlParams.get('subid');
-    if (subidUrl) {
-        localStorage.setItem('bemob_subid', subidUrl);
-    }
+    const clickIdDaUrl = urlParams.get('cid') || urlParams.get('subid') || urlParams.get('clickid') || urlParams.get('sub_id');
 
-    // 2. Localiza os botões originais da sua página baseando-se nos textos do seu print
-    const botoes = document.querySelectorAll('button, input[type="button"], input[type="submit"]');
-    let btnPix = null;
-    let btnCartao = null;
-
-    botoes.forEach(botao => {
-        if (botao.textContent.trim().toLowerCase() === 'gerar pix') {
-            btnPix = botao;
+    // 2. Se encontrou na URL, salva no localStorage. Se não vier na URL desta página,
+    // mantém o valor que já estava guardado no navegador vindo da página anterior.
+    if (clickIdDaUrl) {
+        localStorage.setItem('bemob_subid', clickIdDaUrl);
+        console.log('[BeMob] ClickID capturado da URL e armazenado:', clickIdDaUrl);
+    } else {
+        const subidSalvo = localStorage.getItem('bemob_subid');
+        if (subidSalvo) {
+            console.log('[BeMob] ClickID recuperado do localStorage:', subidSalvo);
         }
-        if (botao.textContent.trim().toLowerCase() === 'pagar com cartão') {
-            btnCartao = botao;
-        }
-    });
-
-    // 3. Função injetora que roda antes do envio para o backend
-    function injetarSubidNoPayload() {
-        const subidAtual = localStorage.getItem('bemob_subid') || '';
-        console.log("[BeMob] Injetando ClickID no fluxo de pagamento:", subidAtual);
-        return subidAtual;
-    }
-
-    // Se encontrou o botão de Pix, intercepta amigavelmente para garantir o rastreamento
-    if (btnPix) {
-        btnPix.addEventListener('click', function() {
-            const clickId = injetarSubidNoPayload();
-            // Guarda temporariamente na sessão para o arquivo criar_pix.php ler se necessário
-            window.last_bemob_subid = clickId;
-        }, true);
-    }
-
-    // Se encontrou o botão de Cartão, intercepta amigavelmente para garantir o rastreamento
-    if (btnCartao) {
-        btnCartao.addEventListener('click', function() {
-            const clickId = injetarSubidNoPayload();
-            // Guarda temporariamente na sessão para o arquivo criar_cartao.php ler se necessário
-            window.last_bemob_subid = clickId;
-        }, true);
     }
 });
 
-// 4. Modificação global do Fetch (Garante que se o seu código enviar um JSON por POST para o PHP, o subid vai junto)
-const originalFetch = window.fetch;
-window.fetch = async function(...args) {
-    let [resource, config] = args;
-    
-    // Se o envio for para as suas APIs de criação de pagamento do Mercado Pago
-    if (config && config.body && (resource.includes('criar_pix.php') || resource.includes('criar_cartao.php'))) {
-        try {
-            let bodyData = JSON.parse(config.body);
-            const subidSalvo = localStorage.getItem('bemob_subid') || '';
-            
-            // Injeta o subid diretamente no objeto que vai para o PHP
-            if (typeof bodyData === 'object' && !bodyData.hasOwnProperty('subid')) {
-                bodyData.subid = subidSalvo;
-                config.body = JSON.stringify(bodyData);
-                console.log("[BeMob] Fetch interceptado com sucesso. Payload atualizado com subid.");
+// 3. Interceptador Global do Fetch (Garante a injeção automática no envio ao PHP)
+(function() {
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        let [resource, config] = args;
+        
+        // Verifica se a chamada é para os ficheiros de pagamento
+        if (config && config.body && typeof resource === 'string' && (resource.includes('criar_pix.php') || resource.includes('criar_cartao.php'))) {
+            try {
+                let bodyData = JSON.parse(config.body);
+                const subidSalvo = localStorage.getItem('bemob_subid') || '';
+                
+                // Se o objeto ainda não tem o campo subid, injeta o valor do localStorage
+                if (typeof bodyData === 'object' && bodyData !== null) {
+                    bodyData.subid = subidSalvo;
+                    config.body = JSON.stringify(bodyData);
+                    console.log("[BeMob] Fetch interceptado com sucesso. Payload enviado:", bodyData);
+                }
+            } catch (e) {
+                // Se o body não for um JSON válido, segue sem alterar
             }
-        } catch (e) {
-            // Se o body não for um JSON válido, apenas segue em frente sem quebrar o código
         }
-    }
-    return originalFetch.apply(this, args);
-};
-</script>
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // 1. Lê os parâmetros que estão na URL da barra de endereço
-    const urlParams = new URLSearchParams(window.location.search);
-    const subid_da_url = urlParams.get('subid');
-
-    // 2. Se encontrou o subid na URL, salva ele no navegador do cliente
-    if (subid_da_url) {
-        localStorage.setItem('bemob_subid', subid_da_url);
-        console.log('Subid do BeMob capturado e guardado:', subid_da_url);
-    }
-});
+        return originalFetch.apply(this, args);
+    };
+})();
 </script>
 
 
