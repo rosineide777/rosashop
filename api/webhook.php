@@ -126,6 +126,9 @@ if ($paymentId === '123456789') {
 */
 
 $tiktokSent = false;
+$tiktokHttpCode = 0;
+$tiktokResponse = '';
+$curlErrorMsg = '';
 
 if ($status === 'approved') {
 
@@ -148,11 +151,12 @@ if ($status === 'approved') {
                 CURLOPT_TIMEOUT => 15,
                 CURLOPT_CONNECTTIMEOUT => 5,
                 CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_USERAGENT => 'Webhook-Engine/1.0'
+                CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             ]);
             
             $tiktokResponse = curl_exec($chTiktok);
             $tiktokHttpCode = curl_getinfo($chTiktok, CURLINFO_HTTP_CODE);
+            $curlErrorMsg = curl_error($chTiktok);
             curl_close($chTiktok);
 
             if ($tiktokHttpCode >= 200 && $tiktokHttpCode < 300) {
@@ -171,9 +175,12 @@ if ($status === 'approved') {
 http_response_code(200);
 echo json_encode([
     'success' => true,
-    'message' => 'Webhook processado e enviado ao TikTok com sucesso.',
+    'message' => 'Webhook processado.',
     'payment_id' => $paymentId,
     'status' => $status,
+    'tiktok_http_code' => $tiktokHttpCode,
+    'tiktok_response' => $tiktokResponse,
+    'curl_error' => $curlErrorMsg,
     'tiktok_sent' => $tiktokSent
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
