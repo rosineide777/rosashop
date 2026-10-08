@@ -169,19 +169,15 @@ if (!$isTestPayment) {
 
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-
         CURLOPT_HTTPHEADER => [
             'Authorization: Bearer ' . MP_ACCESS_TOKEN,
             'Content-Type: application/json',
             'Accept: application/json'
         ],
-
         CURLOPT_TIMEOUT => 30,
         CURLOPT_CONNECTTIMEOUT => 10,
-
         CURLOPT_SSL_VERIFYPEER => true,
         CURLOPT_SSL_VERIFYHOST => 2,
-
         CURLOPT_CUSTOMREQUEST => 'GET'
     ]);
 
@@ -327,16 +323,11 @@ if ($status === 'approved') {
 
         curl_setopt_array($chBemob, [
             CURLOPT_RETURNTRANSFER => true,
-
             CURLOPT_TIMEOUT => 15,
             CURLOPT_CONNECTTIMEOUT => 5,
-
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
-
-            CURLOPT_USERAGENT =>
-                'Webhook-Engine/1.0',
-
+            CURLOPT_USERAGENT => 'Webhook-Engine/1.0',
             CURLOPT_HTTPGET => true
         ]);
 
@@ -364,44 +355,31 @@ if ($status === 'approved') {
 }
 
 jsonResponse(200, [
-
     'success' => true,
-
     'message' =>
         $isTestPayment
             ? 'Webhook processado em modo de teste.'
             : 'Webhook processado com sucesso.',
-
     'payment_id' =>
         $paymentId,
-
     'test_mode' =>
         $isTestPayment,
-
     'status' =>
         $status,
-
     'status_detail' =>
         $statusDetail,
-
     'transaction_amount' =>
         $transactionAmount,
-
     'external_reference' =>
         $externalReference,
-
     'click_id' =>
         $clickId,
-
     'bemob_http_code' =>
         $bemobHttpCode,
-
     'bemob_response' =>
         $bemobResponse,
-
     'curl_error' =>
         $curlErrorMsg,
-
     'bemob_sent' =>
         $bemobSent
 ]);
