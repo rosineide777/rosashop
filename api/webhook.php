@@ -320,8 +320,15 @@ if ($status === 'approved') {
 
     if ($clickId !== '') {
 
-        $bemobPostbackBaseUrl =
-            'https://37bn3.bemobtrcks.com/postback';
+    jsonResponse(200, [
+        'success' => true,
+        'message' => 'Chegou antes da chamada do BeMob.',
+        'payment_id' => $paymentId,
+        'click_id' => $clickId
+    ]);
+
+    $bemobPostbackBaseUrl =
+        'https://37bn3.bemobtrcks.com/postback';
 
         $bemobUrl =
             $bemobPostbackBaseUrl .
