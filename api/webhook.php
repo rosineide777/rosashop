@@ -178,6 +178,16 @@ if (!$isTestPayment) {
         ]);
     }
 
+    if (
+        !defined('MP_ACCESS_TOKEN') ||
+        MP_ACCESS_TOKEN === ''
+    ) {
+        jsonResponse(500, [
+            'success' => false,
+            'error' => 'MP_ACCESS_TOKEN não configurado no config.php.'
+        ]);
+    }
+
     $url =
         'https://api.mercadopago.com/v1/payments/' .
         $paymentId;
@@ -187,10 +197,7 @@ if (!$isTestPayment) {
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HTTPHEADER => [
-            'Authorization: Bearer ' .
-            (defined('MP_ACCESS_TOKEN')
-                ? MP_ACCESS_TOKEN
-                : ''),
+            'Authorization: Bearer ' . MP_ACCESS_TOKEN,
             'Content-Type: application/json',
             'Accept: application/json'
         ],
@@ -320,15 +327,8 @@ if ($status === 'approved') {
 
     if ($clickId !== '') {
 
-    jsonResponse(200, [
-        'success' => true,
-        'message' => 'Chegou antes da chamada do BeMob.',
-        'payment_id' => $paymentId,
-        'click_id' => $clickId
-    ]);
-
-    $bemobPostbackBaseUrl =
-        'https://37bn3.bemobtrcks.com/postback';
+        $bemobPostbackBaseUrl =
+            'https://37bn3.bemobtrcks.com/postback';
 
         $bemobUrl =
             $bemobPostbackBaseUrl .
@@ -344,11 +344,13 @@ if ($status === 'approved') {
                 )
             );
 
-        $chBemob =
-            curl_init($bemobUrl);
+        $chBemob = curl_init();
 
         curl_setopt_array($chBemob, [
+            CURLOPT_URL => $bemobUrl,
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
             CURLOPT_TIMEOUT => 15,
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_SSL_VERIFYPEER => true,
@@ -360,14 +362,14 @@ if ($status === 'approved') {
         $bemobResponse =
             curl_exec($chBemob);
 
+        $curlErrorMsg =
+            curl_error($chBemob);
+
         $bemobHttpCode =
             curl_getinfo(
                 $chBemob,
                 CURLINFO_HTTP_CODE
             );
-
-        $curlErrorMsg =
-            curl_error($chBemob);
 
         curl_close($chBemob);
 
