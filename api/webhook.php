@@ -256,7 +256,7 @@ if ($status === 'approved') {
     if ($clickId !== '') {
 
         $bemobPostbackBaseUrl =
-            'https://bemobtrcks.com';
+            'https://37bn3.bemobtrcks.com/postback';
 
         $bemobUrl =
             $bemobPostbackBaseUrl .
