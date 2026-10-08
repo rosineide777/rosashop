@@ -1,3 +1,5 @@
+Sim. No seu código também apareceram alguns caracteres alterados pela formatação da mensagem, principalmente no `preg_match`, `___` e na URL do Mercado Pago. Abaixo está o **PHP completo**, com o bypass colocado no ponto correto: o ID `123456789` pula apenas a validação da assinatura, enquanto os pagamentos reais continuam obrigatoriamente sendo validados.
+
 ```php
 <?php
 
@@ -7,6 +9,13 @@ error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/config.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| FUNÇÃO DE RESPOSTA JSON
+|--------------------------------------------------------------------------
+*/
 
 function jsonResponse($httpCode, array $data)
 {
@@ -20,12 +29,26 @@ function jsonResponse($httpCode, array $data)
     exit;
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| SOMENTE POST
+|--------------------------------------------------------------------------
+*/
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(405, [
         'success' => false,
         'error' => 'Método não permitido.'
     ]);
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| RECEBE O BODY
+|--------------------------------------------------------------------------
+*/
 
 $rawBody = file_get_contents('php://input');
 
@@ -35,17 +58,48 @@ if (!is_array($data)) {
     $data = [];
 }
 
-if (!defined('MP_WEBHOOK_SECRET') || MP_WEBHOOK_SECRET === '') {
+
+/*
+|--------------------------------------------------------------------------
+| VERIFICA CONFIGURAÇÃO DO WEBHOOK
+|--------------------------------------------------------------------------
+*/
+
+if (
+    !defined('MP_WEBHOOK_SECRET') ||
+    MP_WEBHOOK_SECRET === ''
+) {
     jsonResponse(500, [
         'success' => false,
         'error' => 'MP_WEBHOOK_SECRET não configurado.'
     ]);
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| HEADERS DO MERCADO PAGO
+|--------------------------------------------------------------------------
+*/
+
 $xSignature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
 $xRequestId = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
 
+
+/*
+|--------------------------------------------------------------------------
+| EXTRAI ID DO PAGAMENTO
+|--------------------------------------------------------------------------
+*/
+
 $paymentId = null;
+
+
+/*
+|--------------------------------------------------------------------------
+| 1. ID PELA URL
+|--------------------------------------------------------------------------
+*/
 
 if (
     isset($_GET['data.id']) &&
@@ -53,6 +107,13 @@ if (
 ) {
     $paymentId = (string) $_GET['data.id'];
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| 2. ID PELO BODY
+|--------------------------------------------------------------------------
+*/
 
 if (
     $paymentId === null &&
@@ -62,11 +123,19 @@ if (
     $paymentId = (string) $data['data']['id'];
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| 3. ID PELO RESOURCE
+|--------------------------------------------------------------------------
+*/
+
 if (
     $paymentId === null &&
     isset($data['resource']) &&
     is_string($data['resource'])
 ) {
+
     if (
         preg_match(
             '/\/payments\/([0-9]+)/',
@@ -78,6 +147,13 @@ if (
     }
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| VERIFICA SE EXISTE ID
+|--------------------------------------------------------------------------
+*/
+
 if (
     $paymentId === null ||
     !ctype_digit($paymentId)
@@ -88,81 +164,185 @@ if (
     ]);
 }
 
-if ($xSignature === '') {
-    jsonResponse(401, [
-        'success' => false,
-        'error' => 'Assinatura x-signature ausente.'
-    ]);
-}
 
-$signatureParts = [];
+/*
+|--------------------------------------------------------------------------
+| VALIDAÇÃO DA ASSINATURA
+|--------------------------------------------------------------------------
+|
+| O ID 123456789 é reservado para TESTE.
+|
+| Nesse caso:
+| - Não exige x-signature
+| - Não calcula hash
+| - Não rejeita por assinatura
+|
+| Para qualquer outro ID:
+| - A assinatura é obrigatória
+| - A assinatura é calculada
+| - A assinatura é comparada
+|--------------------------------------------------------------------------
+*/
 
-foreach (explode(',', $xSignature) as $part) {
+$isTestPayment = ($paymentId === '123456789');
 
-    $part = trim($part);
 
-    if (strpos($part, '=') === false) {
-        continue;
+if (!$isTestPayment) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | PAGAMENTO REAL - ASSINATURA OBRIGATÓRIA
+    |--------------------------------------------------------------------------
+    */
+
+    if ($xSignature === '') {
+        jsonResponse(401, [
+            'success' => false,
+            'error' => 'Assinatura x-signature ausente.'
+        ]);
     }
 
-    [$key, $value] = explode('=', $part, 2);
 
-    $signatureParts[$key] = $value;
+    /*
+    |--------------------------------------------------------------------------
+    | SEPARA ts E v1
+    |--------------------------------------------------------------------------
+    */
+
+    $signatureParts = [];
+
+    foreach (
+        explode(',', $xSignature)
+        as $part
+    ) {
+
+        $part = trim($part);
+
+        if (
+            strpos($part, '=') === false
+        ) {
+            continue;
+        }
+
+        [$key, $value] = explode(
+            '=',
+            $part,
+            2
+        );
+
+        $signatureParts[$key] = $value;
+    }
+
+
+    $ts = $signatureParts['ts'] ?? '';
+    $v1 = $signatureParts['v1'] ?? '';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VERIFICA FORMATO DA ASSINATURA
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        $ts === '' ||
+        $v1 === ''
+    ) {
+        jsonResponse(401, [
+            'success' => false,
+            'error' => 'Formato inválido da assinatura x-signature.'
+        ]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | MONTA MANIFEST
+    |--------------------------------------------------------------------------
+    */
+
+    $manifest = 'id:' . $paymentId . ';';
+
+    if ($xRequestId !== '') {
+        $manifest .=
+            'request-id:' .
+            $xRequestId .
+            ';';
+    }
+
+    $manifest .=
+        'ts:' .
+        $ts .
+        ';';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CALCULA ASSINATURA HMAC
+    |--------------------------------------------------------------------------
+    */
+
+    $calculatedSignature = hash_hmac(
+        'sha256',
+        $manifest,
+        MP_WEBHOOK_SECRET
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | COMPARA ASSINATURAS
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        !hash_equals(
+            strtolower($v1),
+            strtolower($calculatedSignature)
+        )
+    ) {
+        jsonResponse(401, [
+            'success' => false,
+            'error' => 'Assinatura do Mercado Pago inválida.'
+        ]);
+    }
 }
 
-$ts = $signatureParts['ts'] ?? '';
-$v1 = $signatureParts['v1'] ?? '';
 
-if ($ts === '' || $v1 === '') {
-    jsonResponse(401, [
-        'success' => false,
-        'error' => 'Formato inválido da assinatura x-signature.'
-    ]);
-}
+/*
+|--------------------------------------------------------------------------
+| CONSULTA O PAGAMENTO NO MERCADO PAGO
+|--------------------------------------------------------------------------
+*/
 
-$manifest = 'id:' . $paymentId . ';';
+$url =
+    'https://api.mercadopago.com/v1/payments/' .
+    $paymentId;
 
-if ($xRequestId !== '') {
-    $manifest .= 'request-id:' . $xRequestId . ';';
-}
-
-$manifest .= 'ts:' . $ts . ';';
-
-$calculatedSignature = hash_hmac(
-    'sha256',
-    $manifest,
-    MP_WEBHOOK_SECRET
-);
-
-if (
-    !hash_equals(
-        strtolower($v1),
-        strtolower($calculatedSignature)
-    )
-) {
-    jsonResponse(401, [
-        'success' => false,
-        'error' => 'Assinatura do Mercado Pago inválida.'
-    ]);
-}
-
-$url = 'https://api.mercadopago.com/v1/payments/' . $paymentId;
 
 $ch = curl_init($url);
 
 curl_setopt_array($ch, [
+
     CURLOPT_RETURNTRANSFER => true,
+
     CURLOPT_HTTPHEADER => [
         'Authorization: Bearer ' . MP_ACCESS_TOKEN,
         'Content-Type: application/json',
         'Accept: application/json'
     ],
+
     CURLOPT_TIMEOUT => 30,
+
     CURLOPT_CONNECTTIMEOUT => 10,
+
     CURLOPT_SSL_VERIFYPEER => true,
+
     CURLOPT_SSL_VERIFYHOST => 2,
+
     CURLOPT_CUSTOMREQUEST => 'GET'
 ]);
+
 
 $response = curl_exec($ch);
 
@@ -175,19 +355,36 @@ $httpCode = curl_getinfo(
 
 curl_close($ch);
 
+
+/*
+|--------------------------------------------------------------------------
+| ERRO NA CONSULTA
+|--------------------------------------------------------------------------
+*/
+
 if (
     $response === false ||
     $curlError !== '' ||
     $httpCode >= 400
 ) {
+
     jsonResponse(500, [
         'success' => false,
-        'error' => 'Erro ao consultar o pagamento no Mercado Pago.',
-        'details' => $curlError !== ''
-            ? $curlError
-            : 'HTTP Code: ' . $httpCode
+        'error' =>
+            'Erro ao consultar o pagamento no Mercado Pago.',
+        'details' =>
+            $curlError !== ''
+                ? $curlError
+                : 'HTTP Code: ' . $httpCode
     ]);
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| DECODIFICA PAGAMENTO
+|--------------------------------------------------------------------------
+*/
 
 $payment = json_decode(
     $response,
@@ -195,39 +392,86 @@ $payment = json_decode(
 );
 
 if (!is_array($payment)) {
+
     jsonResponse(500, [
         'success' => false,
-        'error' => 'Resposta inválida do Mercado Pago.'
+        'error' =>
+            'Resposta inválida do Mercado Pago.'
     ]);
 }
 
-$status = $payment['status'] ?? 'unknown';
 
-$statusDetail = $payment['status_detail'] ?? null;
+/*
+|--------------------------------------------------------------------------
+| DADOS DO PAGAMENTO
+|--------------------------------------------------------------------------
+*/
 
-$transactionAmount = isset(
-    $payment['transaction_amount']
-)
-    ? (float) $payment['transaction_amount']
-    : 0;
+$status =
+    $payment['status'] ??
+    'unknown';
 
-$externalReference = $payment['external_reference'] ?? null;
+$statusDetail =
+    $payment['status_detail'] ??
+    null;
 
-$payerEmail = $payment['payer']['email']
-    ?? 'sem-email@checkout.com';
+$transactionAmount =
+    isset($payment['transaction_amount'])
+        ? (float) $payment['transaction_amount']
+        : 0;
+
+$externalReference =
+    $payment['external_reference'] ??
+    null;
+
+$payerEmail =
+    $payment['payer']['email'] ??
+    'sem-email@checkout.com';
+
+
+/*
+|--------------------------------------------------------------------------
+| VARIÁVEIS DO BEMOB
+|--------------------------------------------------------------------------
+*/
 
 $bemobSent = false;
+
 $bemobHttpCode = 0;
+
 $bemobResponse = '';
+
 $curlErrorMsg = '';
+
 $clickId = '';
 
+
+/*
+|--------------------------------------------------------------------------
+| SOMENTE PAGAMENTO APPROVED
+|--------------------------------------------------------------------------
+*/
+
 if ($status === 'approved') {
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXTRAI CLICK ID DO EXTERNAL_REFERENCE
+    |--------------------------------------------------------------------------
+    */
 
     if (
         !empty($externalReference) &&
         is_string($externalReference)
     ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | FORMATO:
+        |
+        | CLICK_ID___OUTRA_INFORMACAO
+        |--------------------------------------------------------------------------
+        */
 
         if (
             strpos(
@@ -241,22 +485,44 @@ if ($status === 'approved') {
                 $externalReference
             );
 
-            $clickId = isset($partes[0])
-                ? trim($partes[0])
-                : '';
+            $clickId =
+                isset($partes[0])
+                    ? trim($partes[0])
+                    : '';
 
         } else {
 
-            $clickId = trim(
-                $externalReference
-            );
+            /*
+            |--------------------------------------------------------------------------
+            | SE FOR SOMENTE O CLICK ID
+            |--------------------------------------------------------------------------
+            */
+
+            $clickId =
+                trim(
+                    $externalReference
+                );
         }
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENVIA POSTBACK PARA BEMOB
+    |--------------------------------------------------------------------------
+    */
 
     if ($clickId !== '') {
 
         $bemobPostbackBaseUrl =
             'https://37bn3.bemobtrcks.com/postback';
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MONTA URL DO POSTBACK
+        |--------------------------------------------------------------------------
+        */
 
         $bemobUrl =
             $bemobPostbackBaseUrl .
@@ -272,28 +538,50 @@ if ($status === 'approved') {
                 )
             );
 
-        $chBemob = curl_init(
-            $bemobUrl
-        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | ENVIA POSTBACK
+        |--------------------------------------------------------------------------
+        */
+
+        $chBemob =
+            curl_init($bemobUrl);
+
 
         curl_setopt_array(
             $chBemob,
             [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 15,
-                CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
+
+                CURLOPT_RETURNTRANSFER =>
+                    true,
+
+                CURLOPT_TIMEOUT =>
+                    15,
+
+                CURLOPT_CONNECTTIMEOUT =>
+                    5,
+
+                CURLOPT_SSL_VERIFYPEER =>
+                    true,
+
+                CURLOPT_SSL_VERIFYHOST =>
+                    2,
+
                 CURLOPT_USERAGENT =>
                     'Webhook-Engine/1.0',
-                CURLOPT_HTTPGET => true
+
+                CURLOPT_HTTPGET =>
+                    true
             ]
         );
+
 
         $bemobResponse =
             curl_exec(
                 $chBemob
             );
+
 
         $bemobHttpCode =
             curl_getinfo(
@@ -301,37 +589,83 @@ if ($status === 'approved') {
                 CURLINFO_HTTP_CODE
             );
 
+
         $curlErrorMsg =
             curl_error(
                 $chBemob
             );
 
+
         curl_close(
             $chBemob
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VERIFICA SE O BEMOB ACEITOU
+        |--------------------------------------------------------------------------
+        */
 
         if (
             $bemobHttpCode >= 200 &&
             $bemobHttpCode < 300
         ) {
+
             $bemobSent = true;
         }
     }
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| RESPOSTA FINAL
+|--------------------------------------------------------------------------
+*/
+
 jsonResponse(200, [
+
     'success' => true,
-    'message' => 'Webhook processado com sucesso.',
-    'payment_id' => $paymentId,
-    'status' => $status,
-    'status_detail' => $statusDetail,
-    'transaction_amount' => $transactionAmount,
-    'external_reference' => $externalReference,
-    'click_id' => $clickId,
-    'bemob_http_code' => $bemobHttpCode,
-    'bemob_response' => $bemobResponse,
-    'curl_error' => $curlErrorMsg,
-    'bemob_sent' => $bemobSent
+
+    'message' =>
+        $isTestPayment
+            ? 'Webhook processado em modo de teste.'
+            : 'Webhook processado com sucesso.',
+
+    'payment_id' =>
+        $paymentId,
+
+    'test_mode' =>
+        $isTestPayment,
+
+    'status' =>
+        $status,
+
+    'status_detail' =>
+        $statusDetail,
+
+    'transaction_amount' =>
+        $transactionAmount,
+
+    'external_reference' =>
+        $externalReference,
+
+    'click_id' =>
+        $clickId,
+
+    'bemob_http_code' =>
+        $bemobHttpCode,
+
+    'bemob_response' =>
+        $bemobResponse,
+
+    'curl_error' =>
+        $curlErrorMsg,
+
+    'bemob_sent' =>
+        $bemobSent
 ]);
+
 
 exit;
