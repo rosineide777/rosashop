@@ -348,7 +348,7 @@ if ($status === 'approved') {
 
         curl_setopt_array($chBemob, [
             CURLOPT_URL => $bemobUrl,
-            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_RETURNTRANSFER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_TIMEOUT => 15,
@@ -356,11 +356,13 @@ if ($status === 'approved') {
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_USERAGENT => 'Webhook-Engine/1.0',
-            CURLOPT_HTTPGET => true
+            CURLOPT_HTTPGET => true,
+            CURLOPT_WRITEFUNCTION => function ($ch, $responseData) {
+                return strlen($responseData);
+            }
         ]);
 
-        $bemobResponse =
-            curl_exec($chBemob);
+        curl_exec($chBemob);
 
         $curlErrorMsg =
             curl_error($chBemob);
