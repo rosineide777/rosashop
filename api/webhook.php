@@ -34,16 +34,6 @@ if (!is_array($data)) {
     $data = [];
 }
 
-if (
-    !defined('MP_WEBHOOK_SECRET') ||
-    MP_WEBHOOK_SECRET === ''
-) {
-    jsonResponse(500, [
-        'success' => false,
-        'error' => 'MP_WEBHOOK_SECRET não configurado.'
-    ]);
-}
-
 $xSignature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
 $xRequestId = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
 
@@ -99,6 +89,16 @@ $externalReference = null;
 $payerEmail = 'sem-email@checkout.com';
 
 if (!$isTestPayment) {
+
+    if (
+        !defined('MP_WEBHOOK_SECRET') ||
+        MP_WEBHOOK_SECRET === ''
+    ) {
+        jsonResponse(500, [
+            'success' => false,
+            'error' => 'MP_WEBHOOK_SECRET não configurado.'
+        ]);
+    }
 
     if ($xSignature === '') {
         jsonResponse(401, [
