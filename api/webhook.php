@@ -1,6 +1,3 @@
-Sim. No seu código também apareceram alguns caracteres alterados pela formatação da mensagem, principalmente no `preg_match`, `___` e na URL do Mercado Pago. Abaixo está o **PHP completo**, com o bypass colocado no ponto correto: o ID `123456789` pula apenas a validação da assinatura, enquanto os pagamentos reais continuam obrigatoriamente sendo validados.
-
-```php
 <?php
 
 ini_set('display_errors', 0);
