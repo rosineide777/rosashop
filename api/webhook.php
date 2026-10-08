@@ -669,3 +669,5 @@ jsonResponse(200, [
 
 
 exit;
+
+// teste de atualizacao forcada bemob 2026
