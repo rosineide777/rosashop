@@ -7,7 +7,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/config.php';
 
-function jsonResponse($httpCode, array $data)
+function jsonResponse(int $httpCode, array $data): void
 {
     http_response_code($httpCode);
 
