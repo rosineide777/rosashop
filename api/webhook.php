@@ -75,7 +75,7 @@ if ($paymentId === '123456789') {
     }
 } else {
     // Consulta real na API do Mercado Pago para pagamentos reais
-    $url = 'https://api.mercadopago.com/v1/payments/' . $paymentId;
+    $url = 'https://mercadopago.com' . $paymentId;
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
@@ -123,13 +123,13 @@ if ($paymentId === '123456789') {
 
 /*
 |--------------------------------------------------------------------------
-| PROCESSAMENTO DO ENVIO DIRETO PARA A API DE CONVERSÕES DO TIKTOK
+| PROCESSAMENTO DO ENVIO PARA O BEMOB (POSTBACK S2S)
 |--------------------------------------------------------------------------
 */
 
-$tiktokSent = false;
-$tiktokHttpCode = 0;
-$tiktokResponse = '';
+$bemobSent = false;
+$bemobHttpCode = 0;
+$bemobResponse = '';
 $curlErrorMsg = '';
 
 if ($status === 'approved') {
@@ -144,66 +144,28 @@ if ($status === 'approved') {
         }
         
         if (!empty($clickId)) {
-            // Endpoint oficial da API de Conversões do TikTok v1.3
-            $tiktokUrl = "https://business-api.tiktok.com/open_api/v1.3/pixel/track/";
+            // COLOQUE O SEU POSTBACK URL DO BEMOB AQUI EMBAIXO SUBSTUINDO ESTE LINK DE EXEMPLO:
+            $bemobPostbackBaseUrl = "https://37bn3.bemobtrcks.com/postback";
             
-            // Gera o hash SHA256 do e-mail do cliente exigido pelo TikTok
-            $emailHash = hash('sha256', strtolower(trim($payerEmail)));
+            // Monta o link de disparo anexando dinamicamente o ID do clique e o valor da venda
+            $bemobUrl = $bemobPostbackBaseUrl . "?cid=" . urlencode($clickId) . "&payout=" . urlencode($transactionAmount);
 
-            // Payload estruturado corrigido para produção (sem modo de teste)
-            $payload = [
-                "pixel_code" => "DAVURN3C77U77GG17K20",
-                "event" => "CompletePayment",
-                "event_source" => "PIXEL_EVENTS",
-                "data" => [
-                    [
-                        "event_time" => time(),
-                        "value" => (float) $transactionAmount,
-                        "currency" => "BRL",
-                        "user_data" => [
-                            "email" => [$emailHash]
-                        ],
-                        "context" => [
-                            "ad" => [
-                                "callback_id" => $clickId
-                            ]
-                        ],
-                        "properties" => [
-                            "contents" => [
-                                [
-                                    "content_id" => "produto_principal",
-                                    "content_type" => "product",
-                                    "quantity" => 1,
-                                    "price" => (float) $transactionAmount
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ];
-
-            $chTiktok = curl_init($tiktokUrl);
-            curl_setopt_array($chTiktok, [
+            $chBemob = curl_init($bemobUrl);
+            curl_setopt_array($chBemob, [
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => json_encode($payload),
                 CURLOPT_TIMEOUT => 15,
                 CURLOPT_CONNECTTIMEOUT => 5,
                 CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_HTTPHEADER => [
-                    "Content-Type: application/json",
-                    "Access-Token: fd86247944ec5910d3c2a608eb47d3b2077a323a"
-                ],
                 CURLOPT_USERAGENT => 'Webhook-Engine/1.0'
             ]);
             
-            $tiktokResponse = curl_exec($chTiktok);
-            $tiktokHttpCode = curl_getinfo($chTiktok, CURLINFO_HTTP_CODE);
-            $curlErrorMsg = curl_error($chTiktok);
-            curl_close($chTiktok);
+            $bemobResponse = curl_exec($chBemob);
+            $bemobHttpCode = curl_getinfo($chBemob, CURLINFO_HTTP_CODE);
+            $curlErrorMsg = curl_error($chBemob);
+            $chBemob = null;
 
-            if ($tiktokHttpCode >= 200 && $tiktokHttpCode < 300) {
-                $tiktokSent = true;
+            if ($bemobHttpCode >= 200 && $bemobHttpCode < 300) {
+                $bemobSent = true;
             }
         }
     }
@@ -218,13 +180,13 @@ if ($status === 'approved') {
 http_response_code(200);
 echo json_encode([
     'success' => true,
-    'message' => 'Webhook processado.',
+    'message' => 'Webhook processado e enviado para o Bemob.',
     'payment_id' => $paymentId,
     'status' => $status,
-    'tiktok_http_code' => $tiktokHttpCode,
-    'tiktok_response' => $tiktokResponse,
+    'bemob_http_code' => $bemobHttpCode,
+    'bemob_response' => $bemobResponse,
     'curl_error' => $curlErrorMsg,
-    'tiktok_sent' => $tiktokSent
+    'bemob_sent' => $bemobSent
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 exit;
